@@ -1,0 +1,32 @@
+
+
+Required Features :
+
+	- Swarming Hornets
+		- Formations
+		- Decentralised Communication
+			- if attacked hornets become enranged
+			- remember last location of enemy, this can be communicated to another hornet
+		
+		
+	- Some sort of planning system
+		- Danger associated with object (Gained from reinforcement? )
+		- 
+	- 
+
+Desired Features :
+
+	- Genetic Algo
+	- Q learning
+	- Descision Trees
+	- Heierachical Finite State Machies
+	
+Characters :
+
+	-Bumble(Working Title)
+	
+	-The Dragoon
+	
+	-The Princess
+	
+	-Witch 
