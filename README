@@ -56,8 +56,12 @@
 																	   
                                                                        
 
+																	   
+Features
+========
+																	   
 Required Features :
-
+-------------------
 	- Swarming Hornets
 		- Formations
 		- Decentralised Communication
@@ -71,14 +75,14 @@ Required Features :
 	- 
 
 Desired Features :
-
+------------------
 	- Genetic Algo
 	- Q learning
 	- Descision Trees
 	- Heierachical Finite State Machies
 	
 Characters :
-
+------------
 	-Bumble(Working Title)
 	
 	-The Dragoon
