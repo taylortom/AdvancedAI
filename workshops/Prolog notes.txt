@@ -1,0 +1,25 @@
+Notes on the Prolog Refresher & application to V-World
+
+This first workshop is intended to 'get you ready' for the exploration of Donald Nute's V-World (Game). In preparation, you should make yourself familiar with the location of the V-World Folder on the P-Drive, and its directory structure, i.e. what is there. This is a summary:
+
+The path (currently) for this is:
+
+P:\COURSEWK\CI342\V-World
+
+I recommend that you copy this entire folder to whatever personal storage medium you like. It is important for you to be able to make your own changes/ new files, etc. so your own copy could be invaluable. Note: I have made certain modifications from Donald Nute's original. The version downloadable from his site will not work.
+
+Notice that there are a large number of files in this folder. They are:
+
+Executable (.exe): This is (obviously) an executable version. It is of no real use to us, but it is necessary to have because some icons are stored in it (for some reason!)
+
+Overlay (.ovl): This is to go with the executable - of no use to us, but if you were to run the executable, this would be needed ( a cut down version of the Prolog Kernel)
+
+Prolog files (.pl): Usual Prolog files. These are:
+a. vworld.pl ... the main world
+b. mapmaker.pl ... a utility  to design levels (a level editor)
+c. search.pl ... a program to experiment with search algorithms
+World files (.vw): These are actually just Prolog files with a changed suffix (so that they can show up in the dedicated 'Open' box for loadiing worlds. There are a number of these. Note. They cannot be saved as normal in this format. They must be Exported.
+
+Agent Files (.agt): Again, these are just Prolog files renamed for the same reasons as world files. Same restrictions apply to saving these files.
+
+Please make sure you are familiar with this flat structure. You will become more familiar as the workshop/ workshop time proceeds.

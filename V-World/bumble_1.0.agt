@@ -1,0 +1,131 @@
+% Bumble version 1.0: a sample agent file for the Virtual World system
+%
+% Author: Donald Nute
+%
+% Date created:  02/02/1998
+% Last modified: 12/06/2005
+%
+
+:- dynamic [agent/2,tried/0,pushed/0].
+
+% agent(+Perceptions, -Action) receives set of Perceptions from the
+% V-World simulator and returns an Action. Perceptions is a list of 
+% the form
+%
+% [Strength,Damage,Inventory,Last,
+%	[NWNW, NNW , NN  , NNE , NENE],
+%	[WNW , NW  , N   , NE  , ENE ]
+%	[WW  , W   , HERE, E   , EE  ],
+%	[WSW , SW  , S   , SE  , ESE ],
+%	[SWSW, SSW , SS  , SSE , SESE]]
+% 
+% where the last five items in the list lists comprising the contents
+% of the 5 x 5 grid centered on the agent's current location (HERE).
+% Inventory is also a list of the items the agent is currently holding.
+% Last points in the direction of the location the agent last occupied.
+% For example, if the agent tried successfully to move north at its
+% last turn, then Last = s; but if the agent tried to move north and
+% its movement was blocked, then Last = same.
+%
+% An agent cannot see through an opaque object. If its view of a cell
+% is hidden by an object, the corresponding variable in its visual field
+% has the value cant_see.
+
+agent(Perceptions,Action) :-
+	bumble(Perceptions,Action).
+
+% Bumble generally goes through doors when he sees them, eats whatever
+% he sees that can be eaten, picks up anything he can, pushes on everything
+% he sees except walls and animate objects, runs away from animate objects,
+% and otherwise tends to move in straight lines with random changes of 
+% direction.
+
+% Although Bumble can "see" everything within a 2-cell radius, he only
+% pays attention to objects that are adjacent to his current location.
+
+% Here are the instructions Bumble follows.
+
+% Try to go through any nearby door if you didn't try to go through
+% a door on the last move.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(tried),
+	member(door,[NW,N,NE,W,E,SW,S,SE],Num),
+	assert(tried),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+% Move away from any threatening object if posible
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
+	threatening(Obj),
+	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
+
+% Consume any nearby fruit.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+% Collect any nearby desirable object.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	desirable(Obj),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+% Keys, bird seed, and bug spray are desirable.
+
+desirable(bkey).
+desirable(blukey).
+desirable(ykey).
+desirable(gkey).
+desirable(pkey).
+desirable(birdseed).
+desirable(bugspray).
+
+% Try pushing nearby interesting objects
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	interesting(Obj),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+% Trees, red croses, and birds are interesting.
+
+interesting(tree).
+interesting(cross).
+interesting(bird).
+
+% Hornets, snails, and thorns are threatening.
+
+threatening(hornet).
+threatening(snail).
+threatening(thorn).
+
+% About 87% of the time, move in the direction you went
+% last if it is clear.
+
+bumble([_,_,_,LastLocation,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	random_direction(X),
+	member(X,[nw,n,ne,w,e,sw,s,se],Test),
+	Test > 1,
+	member(LastLocation,[se,s,sw,e,w,ne,n,nw],Num),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
+
+% Move at random to empty space.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(o,[NW,N,NE,W,E,SW,S,SE]),
+	repeat,
+	random_direction(Dir),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num2),
+	member(o,[NW,N,NE,W,E,SW,S,SE],Num2).
+
+% When all else fails, sit out a move.
+
+bumble(_,sit).
