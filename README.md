@@ -54,3 +54,12 @@ I have collectd some resources on prolog and search in prolog
 	
 	- Game Ai on reddit http://www.reddit.com/r/gameai
 
+Win Prolog References - 
+	
+	- Programming Guide http://www.lpa.co.uk/ftp/4900/win_prg.pdf
+
+	- Technical Reference http://www.lpa.co.uk/ftp/4900/win_ref.pdf
+	
+	- User Guide http://www.lpa.co.uk/ftp/4900/win_usr.pdf
+	
+	

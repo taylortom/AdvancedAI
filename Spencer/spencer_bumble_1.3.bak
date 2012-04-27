@@ -1,0 +1,416 @@
+% Bumble version 1.0: a sample agent file for the Virtual World system
+%
+% Author: Donald Nute
+%
+% Date created:  02/02/1998
+% Last modified: 12/06/2005
+%
+
+%:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry/0,hurt/0].
+
+:- dynamic [agent/2,tried/0,pushed/0,hungry/0,hurt/0,mymap/3,here/2,last_seen/3]. 
+
+% agent(+Perceptions, -Action) receives set of Perceptions from the
+% V-World simulator and returns an Action. Perceptions is a list of 
+% the form
+%
+% [Strength,Damage,Inventory,Last,
+%	[NWNW, NNW , NN  , NNE , NENE],
+%	[WNW , NW  , N   , NE  , ENE ]
+%	[WW  , W   , HERE, E   , EE  ],
+%	[WSW , SW  , S   , SE  , ESE ],
+%	[SWSW, SSW , SS  , SSE , SESE]]
+% 
+% where the last five items in the list lists comprising the contents
+% of the 5 x 5 grid centered on the agent's current location (HERE).
+% Inventory is also a list of the items the agent is currently holding.
+% Last points in the direction of the location the agent last occupied.
+% For example, if the agent tried successfully to move north at its
+% last turn, then Last = s; but if the agent tried to move north and
+% its movement was blocked, then Last = same.
+%
+% An agent cannot see through an opaque object. If its view of a cell
+% is hidden by an object, the corresponding variable in its visual field
+% has the value cant_see.
+
+agent(Perceptions,Action) :-
+	set_bumble_states(Perceptions), 
+	build_bumble_map(Perceptions), % new in 1.3 
+	bumble(Perceptions,Action).
+
+set_bumble_states([Strength,Damage|_]) :-
+	is_bumble_hungry(Strength),
+	is_bumble_hurt(Damage).
+	
+is_bumble_hungry(Strength):-
+	Strength < 1000, % if Strength is less than 1000
+	assert(hungry). % then bumble is hungry
+
+is_bumble_hungry(Strength):-
+	Strength > 3000, % if Strength is more than 3000
+	retractall(hungry). % then bumble is not hungry
+
+is_bumble_hungry(Strength). % otherwise no change
+	
+is_bumble_hurt(Damage):-
+	Damage > 50, % if Damage is more than 50
+	assert(hurt). % then bumble is hurt
+
+is_bumble_hurt(Damage):-
+	Damage = 0, % if Damage goes down to 0
+	retractall(hurt). % then bumble is not hurt
+
+is_bumble_hurt(Damage). % otherwise no change 1-49
+	
+
+% MAP
+
+build_bumble_map(Perceptions):- 
+	\+ here(_,_), !, % first time, no map 
+	assert(here(0,0)), % always starts at (0,0) 
+	assert(mymap(0,0,o)), % must be open space 
+	update_bumble_map(0,0,Perceptions). 
+
+build_bumble_map([_,_,_,Dir,_,_,_,_,_]):- 
+	Dir=same, ! . % no move - cut search - nothing 
+
+
+% NOTE X + is move to the right, Y + is down. 
+build_bumble_map([_,_,_,Dir,V1,V2,V3,V4,V5]):- 
+	\+ tried, !, % bumble did not go through a door last time 
+	here(X,Y), 
+	member(Dir,[nw,n,ne,e,se,s,sw,w],Pos), 
+	member((XX,YY), [(1,1),(0,1),(-1,1),(-1,0),(-1,-1), 
+	(0,-1),(1,-1),(1,0)],Pos), 
+	NewX is X+XX, 
+	NewY is Y+YY, 
+	retractall(here(_,_)), 
+	assert(here(NewX,NewY)), 
+	update_bumble_map(NewX,NewY,[_,_,_,Dir,V1,V2,V3,V4,V5]). 
+
+% Updates the current Map
+update_bumble_map(BX,BY,[_,_,_,_, 
+		[NWNW,NNW,NN,NNE,NENE], % V1 
+		[WNW,NW,N,NE,ENE], % V2 
+		[WW,W,_,E,EE], % V3 
+		[WSW,SW,S,SE,ESE], % V4 
+		[SWSW,SSW,SS,SSE,SESE]]):- % V5 
+	here(BX,BY), 
+	findall((X,Y,Obj), % Find all objects in current vision 
+		(member(Obj,[NWNW,NNW,NN,NNE,NENE, 
+			WNW,NW,N,NE,ENE,WW,W,E,EE, 
+			WSW,SW,S,SE,ESE,SWSW,SSW,SS,SSE,SESE],Pos), % Find objects POS
+		member((XX,YY),[(-2,-2),(-1,-2),(0,-2), 
+				(1,-2),(2,-2),(-2,-1),(-1,-1), 
+				(0,-1),(1,-1),(2,-1),(-2,0), 
+				(-1,0),(1,0),(2,0),(-2,1),(-1,1), 
+				(0,1),(1,1),(2,1),(-2,2),(-1,2), 
+				(0,2),(1,2),(2,2)],Pos), 
+			X is BX+XX, 
+			Y is BY+YY ), 
+		List),
+	update_bumble_map_x(List). 
+
+
+% add items to bubmle map 
+
+update_bumble_map_x( [(X,Y,Obj) |ListTail]):-
+ Add_toMap(X,Y,Obj),
+update_bumble_map_x(ListTail).
+
+
+
+Add_toMap(X,Y,Obj):-
+%	X =: [X | ListHead],
+%	[Y | ListHead],
+%	[Obj | ListHead],
+%	write(' Now writing X'),
+%	write(X),
+
+	write('X:'),
+	write(X),
+	write('Y:'),
+	write(Y),
+	write('Obj:'),
+	write(Obj),
+	\+ Obj = cant_see.
+%	assert(mymap(X,Y,Obj)),
+
+Add_toMap(X,Y,Obj):-
+	write(1).
+
+
+%update_bumble_map_x( [(X,Y,Obj) |ListTail]):-
+%	update_bumble_map_x(ListTail).
+
+
+
+% Bumble generally goes through doors when he sees them, eats whatever
+% he sees that can be eaten, picks up anything he can, pushes on everything
+% he sees except walls and animate objects, runs away from animate objects,
+% and otherwise tends to move in straight lines with random changes of 
+% direction.
+
+% Although Bumble can "see" everything within a 2-cell radius, he only
+% pays attention to objects that are adjacent to his current location.
+
+/* Table of directions as specified in Nute's V-World 
+... Our Workshop 3 
+*/ 
+move_toward_x(nwnw,nw). % top left corner 
+move_toward_x(nwnw,n). 
+move_toward_x(nwnw,w). 
+% 
+move_toward_x(nene,ne). % top right corner 
+move_toward_x(nene,n). 
+move_toward_x(nene,e). 
+% 
+move_toward_x(swsw,sw). % bottom left corner 
+move_toward_x(swsw,s). 
+move_toward_x(swsw,w). 
+% 
+move_toward_x(sese,se). % botton right corner 
+move_toward_x(sese,s). 
+move_toward_x(sese,e). 
+% a - top left of centre 
+move_toward_x(nnw,w). 
+move_toward_x(nnw,nw). 
+% b - top centre 
+move_toward_x(nn,n). 
+move_toward_x(nn,nw). 
+move_toward_x(nn,ne). 
+% c - top right of centre 
+move_toward_x(nne,n). 
+move_toward_x(nne,ne). 
+% d - bottom left of centre 
+move_toward_x(ssw,s). 
+move_toward_x(ssw,sw). 
+% e - bottom centre 
+move_toward_x(ss,s). 
+move_toward_x(ss,sw). 
+move_toward_x(ss,se). 
+% f - bottom right of centre 
+move_toward_x(sse,s). 
+move_toward_x(sse,se). 
+% g - left up from centre 
+move_toward_x(wnw,w). 
+move_toward_x(wnw,nw). 
+% h - left centre 
+move_toward_x(ww,w). 
+move_toward_x(ww,nw). 
+move_toward_x(ww,sw). 
+% i - left below centre 
+move_toward_x(wsw,w). 
+move_toward_x(wsw,sw). 
+% j - right up from centre 
+move_toward_x(ene,e). 
+move_toward_x(ene,ne). 
+% k - right centre 
+move_toward_x(ee,e). 
+move_toward_x(ee,ne). 
+move_toward_x(ene,se). 
+% l - right below centre 
+move_toward_x(ese,e). 
+move_toward_x(ese,se). 
+%%%%%%%%%%%%%% end of table of directions %%%% 
+
+
+
+% Here are the instructions Bumble follows.
+
+% Try to go through any nearby door if you didn't try to go through
+% a door on the last move.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(tried),
+	member(door,[NW,N,NE,W,E,SW,S,SE],Num),
+	assert(tried),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+
+% Try and go towards a door in in the 5 * 5
+
+bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[NWN,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],
+	[SWSE,SSW,SS,SSE,SESE]],move(Dir)) :-
+	%\+ retract(tried),
+	member(door,[NWNW,NNW,NN,NNE,NENE,NWN,
+			 ENE,WW,EE,WSW,ESE,
+			 SWSE,SSW,SS,SSE,SESE],Num),
+	member(GoToward, [nwnw,nnw,nn,nne,nene,nwn,ene,ww,ee,wsw,ese,swse,ssw,ss,sse,sese],Num),
+	move_toward_x(GoToward,Dir).
+
+% Move away from any threatening object if posible
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
+	threatening(Obj),
+	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
+
+% Consume any nearby fruit.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num),
+	hungry,
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+% Try and go towards fruit in the 5 * 5
+
+% [Strength,Damage,Inventory,Last,
+%	[NWNW, NNW , NN  , NNE , NENE],
+%	[WNW , NW  , N   , NE  , ENE ]
+%	[WW  , W   , HERE, E   , EE  ],
+%	[WSW , SW  , S   , SE  , ESE ],
+%	[SWSW, SSW , SS  , SSE , SESE]]
+
+%move towards any nearby fruit
+
+bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[NWN,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],
+	[SWSE,SSW,SS,SSE,SESE]],move(Dir)) :-
+	%\+ retract(tried),
+	hungry,
+	member(fruit,[NWNW,NNW,NN,NNE,NENE,NWN,
+			 ENE,WW,EE,WSW,ESE,
+			 SWSE,SSW,SS,SSE,SESE],Num),
+	member(GoToward, [nwnw,nnw,nn,nne,nene,nwn,ene,ww,ee,wsw,ese,swse,ssw,ss,sse,sese],Num),
+	move_toward_x(GoToward,Dir).
+
+% Collect any nearby desirable object.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	desirable(Obj),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+% Keys, bird seed, and bug spray are desirable.
+
+desirable(bkey).
+desirable(blukey).
+desirable(ykey).
+desirable(gkey).
+desirable(pkey).
+desirable(birdseed).
+desirable(bugspray).
+
+
+
+% Permanent wall, a tree, a cross, or a door, 
+
+permanent(cross).
+permanent(throne).
+permanent(tree).
+permanent(w).
+
+
+% Try pushing nearby interesting objects not tree not cross
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	interesting(Obj),
+	\+ Obj = tree,
+	\+ Obj = cross,
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+% Try and move towards any intresting objects if it is a tree and hungry
+
+bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[NWN,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],
+	[SWSE,SSW,SS,SSE,SESE]],move(Dir)) :-
+	%\+ retract(pushed),
+	member(Obj,[NWNW,NNW,NN,NNE,NENE,NWN,
+			 ENE,WW,EE,WSW,ESE,
+			 SWSE,SSW,SS,SSE,SESE],Num),
+	interesting(Obj),
+	\+ Obj = tree,
+	\+ Obj = cross,
+	member(GoToward, [nwnw,nnw,nn,nne,nene,nwn,ene,ww,ee,wsw,ese,swse,ssw,ss,sse,sese],Num),
+	move_toward_x(GoToward,Dir).
+ 	%check the object infront of bummble currently
+
+% Try pushing nearby interesting objects if it is a tree and hungry
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	interesting(Obj),
+	Obj = tree,
+	hungry,
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+% Try and move towards any intresting objects if it is a tree and hungry
+
+bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[NWN,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],
+	[SWSE,SSW,SS,SSE,SESE]],move(Dir)) :-
+	%\+ retract(tried),
+	hungry,
+	member(tree,[NWNW,NNW,NN,NNE,NENE,NWN,
+			 ENE,WW,EE,WSW,ESE,
+			 SWSE,SSW,SS,SSE,SESE],Num),
+	member(GoToward, [nwnw,nnw,nn,nne,nene,nwn,ene,ww,ee,wsw,ese,swse,ssw,ss,sse,sese],Num),
+	move_toward_x(GoToward,Dir).
+ 	%check the object infront of bummble currently
+
+
+% Try pushing nearby interesting objects if it is a cross and hurt
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	interesting(Obj),
+	Obj = cross,
+	hurt,
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+% Try and move towards any intresting objects if it is a cross and hurt
+
+bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[NWN,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],
+	[SWSE,SSW,SS,SSE,SESE]],move(Dir)) :-
+%	\+ retract(pushed),
+	hurt,
+	member(hurt,[NWNW,NNW,NN,NNE,NENE,NWN,
+			 ENE,WW,EE,WSW,ESE,
+			 SWSE,SSW,SS,SSE,SESE],Num),
+	member(GoToward, [nwnw,nnw,nn,nne,nene,nwn,ene,ww,ee,wsw,ese,swse,ssw,ss,sse,sese],Num),
+	move_toward_x(GoToward,Dir).
+ 	%check the object infront of bummble currently
+
+% Trees, red croses, and birds are interesting.
+
+interesting(tree).
+interesting(cross).
+interesting(bird).
+
+% Hornets, snails, and thorns are threatening.
+
+threatening(hornet).
+threatening(snail).
+threatening(thorn).
+
+% About 87% of the time, move in the direction you went
+% last if it is clear.
+
+bumble([_,_,_,LastLocation,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	random_direction(X),
+	member(X,[nw,n,ne,w,e,sw,s,se],Test),
+	Test > 1,
+	member(LastLocation,[se,s,sw,e,w,ne,n,nw],Num),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
+
+% Move at random to empty space.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(o,[NW,N,NE,W,E,SW,S,SE]),
+	repeat,
+	random_direction(Dir),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num2),
+	member(o,[NW,N,NE,W,E,SW,S,SE],Num2).
+
+% When all else fails, sit out a move.
+
+bumble(_,sit).
