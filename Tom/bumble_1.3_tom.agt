@@ -338,32 +338,54 @@ build_bumble_map([_,_,_,Dir,V1,V2,V3,V4,V5]):-
 	update_bumble_map(NewX,NewY,[_,_,_,Dir,V1,V2,V3,V4,V5]).
 
 update_bumble_map(BX,BY,[_,_,_,_,
-			[NWNW,NNW,NN,NNE,NENE], % V1
-			[WNW,NW,N,NE,ENE], % V2
-			[WW,W,_,E,EE], % V3
-			[WSW,SW,S,SE,ESE], % V4
-			[SWSW,SSW,SS,SSE,SESE]]):- % V5
+		[NWNW,NNW,NN,NNE,NENE],		% V1
+		[WNW,NW,N,NE,ENE],		% V2
+		[WW,W,_,E,EE],			% V3
+		[WSW,SW,S,SE,ESE],		% V4
+		[SWSW,SSW,SS,SSE,SESE]]):-	% V5
 	here(BX,BY),
 	findall((X,Y,Obj),
-		(member(Obj,[NWNW,NNW,NN,NNE,NENE,
-			WNW,NW,N,NE,ENE,WW,W,E,EE,
-			WSW,SW,S,SE,ESE,SWSW,SSW,SS,SSE,SESE],Pos),
-		member((XX,YY),[(-2,-2),(-1,-2),(0,-2),
-			(1,-2),(2,-2),(-2,-1),(-1,-1),
-			(0,-1),(1,-1),(2,-1),(-2,0),
-			(-1,0),(1,0),(2,0),(-2,1),(-1,1),
-			(0,1),(1,1),(2,1),(-2,2),(-1,2),
-			(0,2),(1,2),(2,2)],Pos),
-			X is BX+XX,
-			Y is BY+YY ),
-			List),
-	update_bumble_map_x(List).
+	(member(Obj,[NWNW,NNW,NN,NNE,NENE,
+		WNW,NW,N,NE,ENE,WW,W,E,EE,
+		WSW,SW,S,SE,ESE,SWSW,SSW,SS,SSE,SESE],Pos),
+	member((XX,YY),[(-2,-2),(-1,-2),(0,-2),
+		(1,-2),(2,-2),(-2,-1),(-1,-1),
+		(0,-1),(1,-1),(2,-1),(-2,0),
+		(-1,0),(1,0),(2,0),(-2,1),(-1,1),
+		(0,1),(1,1),(2,1),(-2,2),(-1,2),
+		(0,2),(1,2),(2,2)],Pos),
+	X is BX+XX,
+	Y is BY+YY ),
+	List),
+	update_bumble_map_x(List),
+	write(last_seen),
+	nl.	
 
-update_bumble_map_x([(X,Y,Obj)|RestOfList]):-
+update_bumble_map_x([_|List]):-
+	List = [],
+	true.
+
+update_bumble_map_x([(X,Y,Obj)|_]):-
 	\+ Obj = cant_see,
 	\+ Obj = o,
+	\+ mymap(X,Y,_),
+	nl,
+	write(Obj),	
 	assert(mymap(X,Y,Obj)),
-	write(Obj).	
+	fail.
 
-update_bumble_map_x([_|RestOfList]):-
+update_bumble_map_x([(X,Y,Obj)|_]):-
+	Obj = tree,
+	retractall(last_seen(tree,_,_)),
+	assert(last_seen(Obj,X,Y)),
+	fail.
+
+update_bumble_map_x([(X,Y,Obj)|_]):-
+	Obj = cross,
+	retractall(last_seen(cross,_,_)),
+	assert(last_seen(Obj,X,Y)),
+	fail.
+
+update_bumble_map_x([_|RestOfList]):- 
 	update_bumble_map_x(RestOfList).
+
