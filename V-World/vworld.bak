@@ -3,8 +3,9 @@
 % vworld.pl
 % 
 % Copyright 2003 Donald Nute 
-% Date: 12/01/1996 
+% Date project started: 12/01/1996 
 % Last modified by him: 12/08/2005 
+% Date last modified by GW: 15/12/2009
 % 
 % This program operates an artificial environment into 
 % which an agent may be inserted. To complete the 
