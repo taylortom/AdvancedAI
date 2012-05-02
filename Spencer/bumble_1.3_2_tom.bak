@@ -6,7 +6,7 @@
 % Last modified: 12/06/2005
 %
 
-:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry_status/1,hurt_status/1,mymap/3,here/2,last_seen/3,path/2].
+:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry_status/1,hurt_status/1,mymap/3,here/2,last_seen/3,path/2,search_type/1].
 
 % agent(+Perceptions, -Action) receives set of Perceptions from the
 % V-World simulator and returns an Action. Perceptions is a list of 
@@ -224,6 +224,164 @@ bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE]
 % Search
 %
 
+%XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+% NOTE Allot of the code currently contained in this section is GW's
+
+
+
+insert_nodes(Set1,Set2,Set3) :-
+	search_type(depth_first),
+	append(Set1,Set2,Set3).
+
+% For breadth first search, put new nodes at back of queue.
+
+insert_nodes(Set1,Set2,Set3) :-
+	search_type(breadth_first),
+	append(Set2,Set1,Set3).
+
+
+
+% find_path(SearchType,Goal,Start,Path) searches for a list of
+% coordinates (a Path) that leads from the agent's current 
+% location Start (of the form (X,Y)) to a location where
+% an object of the sort specified by Goal is located. Goal
+% might be tree or cross, for example. The kind of search
+% peformed is determined by SearchType, which can be depth_first
+% or breadth_first. To simplify programming, % the Path is built
+% backwards and then reversed.
+%
+% The SearchType and Goal are asserted into clauses where they
+% can be used by insert_nodes/3 and solution/1.
+
+find_path(SearchType,Goal,Start,Path) :-
+	retractall(search_type(_)),
+	assert(search_type(SearchType)),
+	retractall(mygoal(_)),
+	assert(mygoal(Goal)),
+	search([[Start]],ReversedPath),
+	reverse(ReversedPath,Path).
+
+% A path satisfies a Goal if the first (eventually, last)
+% position in the path is occupied by Goal.
+%
+% Of course, you would need a different definition of solution
+% for a different domain.
+
+solution([(X,Y)|_]) :-
+	mygoal(Goal),
+	mymap(X,Y,Goal).
+
+% generate_new_nodes(Path,Goal,Paths) finds (almost) all
+% legal Paths that extend Path by exactly one step in any 
+% direction. A legal path is one made up entirely of
+% locations that, so far as the agent can tell from the
+% map, it can occupy. These are empty locations, locations 
+% where there are doors, locations that contain the goal
+% object, or locations occupied by some object that the
+% agent can remove (listed in clauses for the predicate 
+% can_remove/1.)
+%
+% expand_node/3 actually embodies a heuristic since it does
+% not allow circular Paths to be built. Of course, we would
+% have to define generate_new_nodes/3 differently for a
+% different domain.
+
+generate_new_nodes([(X,Y)|Rest],Paths) :-
+	findall([(XX,YY),(X,Y)|Rest],
+	(
+	 Xminus is X - 1,
+	 Xplus is X + 1,
+	 Yminus is Y - 1,
+	 Yplus is Y + 1,
+	 member(XX,[Xminus,X,Xplus]),
+	 member(YY,[Yminus,Y,Yplus]),
+	 mymap(XX,YY,Obj),
+	 \+ member((XX,YY),[(X,Y)|Rest]),
+	 (
+	  mygoal(Obj)
+	 ;
+	  member(Obj,[o,door])
+	 ;
+	  can_remove(Obj)
+	 )
+	),
+	Paths).
+
+
+
+
+%High Level Search Function
+find_path(SearchType,Goal,Start,Path) :- 
+	retractall(search_type(_)), % house keeping 
+	assert(search_type(SearchType)), 
+	retractall(mygoal(_)), 
+	assert(mygoal(Goal)), % assert the given goal 
+	search([[Start]],ReversedPath), % call the top-level search 
+	reverse(ReversedPath,Path). % reverse it start-to-goal path 
+
+% call with (e.g.) 
+% find_path(breadth_first,tree,(0,0),_). 
+:- dynamic [search_type/1, mygoal/1]. 
+
+search([FirstNode|_],FirstNode) :- % take the first node 
+	solution(FirstNode). % is it the goal tile? 
+
+search([FirstNode|RestOfNodes],Solution) :- % from the current tile 
+	generate_new_nodes(FirstNode,NewNodes), % generate next poss tiles 
+	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
+	!, search(NextSetOfNodes,Solution). % recurse with new list 
+
+% generate_new_nodes(Path,Goal,Paths) finds (almost) all
+% legal Paths that extend Path by exactly one step in any 
+% direction. A legal path is one made up entirely of
+% locations that, so far as the agent can tell from the
+% map, it can occupy. These are empty locations, locations 
+% where there are doors, locations that contain the goal
+% object, or locations occupied by some object that the
+% agent can remove (listed in clauses for the predicate 
+% can_remove/1.)
+%
+% expand_node/3 actually embodies a heuristic since it does
+% not allow circular Paths to be built. Of course, we would
+% have to define generate_new_nodes/3 differently for a
+% different domain.
+
+generate_new_nodes([(X,Y)|Rest],Paths) :-
+	findall([(XX,YY),(X,Y)|Rest],
+	(
+	 Xminus is X - 1,
+	 Xplus is X + 1,
+	 Yminus is Y - 1,
+	 Yplus is Y + 1,
+	 member(XX,[Xminus,X,Xplus]),
+	 member(YY,[Yminus,Y,Yplus]),
+	 mymap(XX,YY,Obj),
+	 \+ member((XX,YY),[(X,Y)|Rest]),
+	 (
+	  mygoal(Obj)
+	 ;
+	  member(Obj,[o,door])
+	 ;
+	  can_remove(Obj) %this should possibly be changed to desireable.
+	 )
+	),
+	Paths).
+
+
+% These are the objects that the agent can remove
+% from a location in test7.vw.
+
+can_remove(fruit).
+can_remove(gkey).
+can_remove(ykey).
+can_remove(bugspray).
+
+
+%XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+
 %
 % Take Path
 %
@@ -231,7 +389,6 @@ bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE]
 % Check if we're already following a path
 
 bumble(_,_) :-
-	 
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
 	Path = [(NewX,NewY)|_],
@@ -252,12 +409,59 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 % Check if we've already seen a tree
 
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	
-	fail,
+	%fail,
 	eat(Strength,Damage),
-	last_seen(tree,X,Y),
+	here(Current_X,Current_Y),
+	last_seen(tree,Goal_X,Goal_Y),
 	nl, write('Hungry, already seen a tree'),
-	find_path_to(X,Y).
+	%find_path_to(X,Y),
+	nl, write('Gloal X :'), write(Goal_X), write('Y :') , write(Goal_Y),
+	find_path(breadth_first,(Goal_X,Goal_Y),(Current_X,Current_Y),Path),
+	nl, write('Search Completed'),
+	printxyo(Path).
+
+
+printxyo(List) :-
+	List = [],	
+	nl, write('list is empty'),
+	true.
+
+
+printxyo([(X,Y,OBJ)|_]) :-
+	nl, write(X),
+	nl, write(Y),
+	nl, write(OBJ),
+	true. 
+
+
+printxyo([_|List]):-
+	List = [],
+	nl, write('Tail Of list is empty'),
+	true.
+
+
+
+%first() :- % take the first node 
+
+
+%	Path(
+
+%update_bumble_map_x([(X,Y,Obj)|_]):-
+
+%	update_bumble_map_x(List).
+	%write(last_seen),
+	%nl.	
+
+%update_bumble_map_x([_|List]):-
+%	List = [],
+%	true.
+ 
+
+
+
+%MoveTowardsNext([(X,Y,Obj)|_]):-
+
+
 
 % Check if we've already seen some fruit
 
@@ -381,6 +585,31 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	% l - right below centre
 	move_toward_x(ese,e).
 	move_toward_x(ese,se).
+
+
+
+%%%% Catisean Cord to DIR %%%
+% Currently only supports 8 point compass
+	%CordDirection(X,Y,DIR)
+
+	%South West
+	cordDirection(-1,-1,sw).
+	%West
+	cordDirection(-1,0,w).
+	%North West
+	cordDirection(-1,1,nw).
+	%North
+	cordDirection(0,1,n).
+	%North East
+	cordDirection(1,1,ne).
+	%East
+	cordDirection(1,0,e).
+	%South East
+	cordDirection(1,-1,se).
+	%South 
+	cordDirection(-1,0,s).
+
+
 
 %%%%%%%%%%%%%% end of table of directions %%%%
 
@@ -562,6 +791,3 @@ heal(_,_):-
 	hurt_status(minor_hurt),
 	\+ hungry_status(starving),
 	nl, write('Bumble needs to heal a bit!').
-
-
-
