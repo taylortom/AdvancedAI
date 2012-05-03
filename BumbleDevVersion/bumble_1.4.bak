@@ -402,7 +402,7 @@ search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node
 	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
 	!, 
 	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % put the next node (best) on CLOSED 
-	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
+	check_CLOSED2(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
 	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
 	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
 	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2). % recurse with new list 

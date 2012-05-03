@@ -584,7 +584,6 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	last_seen(tree,Goal_X,Goal_Y),
 	nl, write('Hungry, already seen a tree'),
 	%find_path_to(X,Y),
-	Path = [],
 	Goal = tree,
 	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
 	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
