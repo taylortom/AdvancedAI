@@ -341,7 +341,7 @@ find_path(SearchType,Goal,Start,Path) :-
 %	reverse(ReversedPath,Path). % reverse it start-to-goal path 
 
 
-	search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
+search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
 	solution(FirstNode). % goal tile? 
 	
 
@@ -354,7 +354,6 @@ search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:-
 	
 add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
 	append([First],CLOSED,New_CLOSED). % append as a list.. [First] 
-
 
 
 
@@ -460,9 +459,6 @@ get_cost(XX,YY,X,Y,Cost):-
 	Y_diff is abs(YY_abs + Y_abs)); true), 
 	Cost is max(X_diff,Y_diff). % simply take the max 
 
-
-add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
-	append([First],CLOSED,New_CLOSED). % append as a list..[First] 
 
 
 get_closest([(X,Y,Goal)|Restof], X_Goal,Y_Goal):- 

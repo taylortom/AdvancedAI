@@ -521,7 +521,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
 	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
 	% Note this should be moved to looking for just teee and not being passsed the goal position..
-	find_path(greedy, Goal,(Current_X,Current_Y,_),Path), 
+	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
 	nl, write('Search Completed'),
 	printxyo(Path).
 
