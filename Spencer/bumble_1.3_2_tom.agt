@@ -6,7 +6,7 @@
 % Last modified: 12/06/2005
 %
 
-:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry_status/1,hurt_status/1,mymap/3,here/2,last_seen/3,path/2,search_type/1].
+:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry_status/1,hurt_status/1,mymap/3,here/2,last_seen/3,path/2, search_type/1, mygoal/1].
 
 % agent(+Perceptions, -Action) receives set of Perceptions from the
 % V-World simulator and returns an Action. Perceptions is a list of 
@@ -240,7 +240,14 @@ insert_nodes(Set1,Set2,Set3) :-
 	search_type(breadth_first),
 	append(Set2,Set1,Set3).
 
-
+% For greedy search, need to sort the queue best at front = smallest h(n). 
+% first append to complete the list & then do a sort. sort/3 takes 
+% a list, in this case [cost,[X,Y, X,Y...]] and uses the first element 
+% of each path [1] as the sort key. Ascending order too 
+insert_nodes(Set1,Set2,Sorted):- 
+	search_type(greedy), % if it is greedy, do sort 
+	append(Set2,Set1,Set3), 
+	sort(Set3,Sorted,[1]). % do something clever! 
 
 % find_path(SearchType,Goal,Start,Path) searches for a list of
 % coordinates (a Path) that leads from the agent's current 
@@ -254,13 +261,7 @@ insert_nodes(Set1,Set2,Set3) :-
 % The SearchType and Goal are asserted into clauses where they
 % can be used by insert_nodes/3 and solution/1.
 
-find_path(SearchType,Goal,Start,Path) :-
-	retractall(search_type(_)),
-	assert(search_type(SearchType)),
-	retractall(mygoal(_)),
-	assert(mygoal(Goal)),
-	search([[Start]],ReversedPath),
-	reverse(ReversedPath,Path).
+
 
 % A path satisfies a Goal if the first (eventually, last)
 % position in the path is occupied by Goal.
@@ -312,25 +313,64 @@ generate_new_nodes([(X,Y)|Rest],Paths) :-
 
 
 %High Level Search Function
+
+
+
+
 find_path(SearchType,Goal,Start,Path) :- 
 	retractall(search_type(_)), % house keeping 
 	assert(search_type(SearchType)), 
 	retractall(mygoal(_)), 
 	assert(mygoal(Goal)), % assert the given goal 
-	search([[Start]],ReversedPath), % call the top-level search 
-	reverse(ReversedPath,Path). % reverse it start-to-goal path 
+	findall((X,Y,Goal), 
+		mymap(X,Y,Goal), 
+		Goals), 
+	get_closest(Goals, X_Goal,Y_Goal), 
+	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[]), 
+	reverse(ReversedPath,Path), % reverse it - start-to-goal 
+	nl,write('Path = ' - Path),nl,ttyflush, ! . % print it - final path 
+
+
+
+%find_path(SearchType,Goal,Start,Path) :- 
+%	retractall(search_type(_)), % house keeping 
+%	assert(search_type(SearchType)), 
+%	retractall(mygoal(_)), 
+%	assert(mygoal(Goal)), % assert the given goal 
+%	search([[Start]],ReversedPath), % call the top-level search 
+%	reverse(ReversedPath,Path). % reverse it start-to-goal path 
+
+
+	search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
+	solution(FirstNode). % goal tile? 
+	
+
+search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
+	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % next poss 
+	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
+	!, 
+	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % add to CLOSED 
+	search(NextSetOfNodes,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes). 
+	
+add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
+	append([First],CLOSED,New_CLOSED). % append as a list.. [First] 
+
+
+
 
 % call with (e.g.) 
 % find_path(breadth_first,tree,(0,0),_). 
-:- dynamic [search_type/1, mygoal/1]. 
+%:- dynamic [search_type/1, mygoal/1]. 
 
-search([FirstNode|_],FirstNode) :- % take the first node 
-	solution(FirstNode). % is it the goal tile? 
+%search([FirstNode|_],FirstNode) :- % take the first node 
+%	solution(FirstNode). % is it the goal tile? 
 
-search([FirstNode|RestOfNodes],Solution) :- % from the current tile 
-	generate_new_nodes(FirstNode,NewNodes), % generate next poss tiles 
-	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
-	!, search(NextSetOfNodes,Solution). % recurse with new list 
+%search([FirstNode|RestOfNodes],Solution) :- % from the current tile 
+%	generate_new_nodes(FirstNode,NewNodes), % generate next poss tiles 
+%	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
+%	!, search(NextSetOfNodes,Solution). % recurse with new list 
+
+
 
 % generate_new_nodes(Path,Goal,Paths) finds (almost) all
 % legal Paths that extend Path by exactly one step in any 
@@ -347,26 +387,87 @@ search([FirstNode|RestOfNodes],Solution) :- % from the current tile
 % have to define generate_new_nodes/3 differently for a
 % different domain.
 
-generate_new_nodes([(X,Y)|Rest],Paths) :-
-	findall([(XX,YY),(X,Y)|Rest],
-	(
-	 Xminus is X - 1,
-	 Xplus is X + 1,
-	 Yminus is Y - 1,
-	 Yplus is Y + 1,
-	 member(XX,[Xminus,X,Xplus]),
-	 member(YY,[Yminus,Y,Yplus]),
-	 mymap(XX,YY,Obj),
-	 \+ member((XX,YY),[(X,Y)|Rest]),
-	 (
-	  mygoal(Obj)
-	 ;
-	  member(Obj,[o,door])
-	 ;
-	  can_remove(Obj) %this should possibly be changed to desireable.
-	 )
-	),
-	Paths).
+
+generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :- 
+	findall([Cost,(XX,YY),(X,Y)|Rest], % given these terms 
+	( 
+	Xminus is X - 1, % generate X,Y coordinates 
+	Xplus is X + 1, % for all the neighbouring tiles 
+	Yminus is Y - 1, % relative to the current X,Y 
+	Yplus is Y + 1, 
+	member(XX,[Xminus,X,Xplus]), % XX becomes bound to values in list 
+	member(YY,[Yminus,Y,Yplus]), % findall will get all combinations 
+	mymap(XX,YY,Obj), % get whatever object is at that location 
+	\+ member((XX,YY),[(X,Y)|Rest]), % have we been here before? (loop detect) 
+	( 
+		mygoal(Obj) % it could be the goal (hopefully!) 
+		; % or 
+		member(Obj,[o,door]) % it could be a door 
+		; % or 
+		can_remove(Obj) % it can be an object he can remove 
+		),
+	get_cost(XX,YY,Goal_X,Goal_Y,Cost) % h(n)calculation 
+	), 
+	Paths). % this is the list of possible locations 
+
+
+%generate_new_nodes([(X,Y)|Rest],Paths) :-
+%	findall([(XX,YY),(X,Y)|Rest],
+%	(
+%	 Xminus is X - 1,
+%	 Xplus is X + 1,
+%	 Yminus is Y - 1,
+%	 Yplus is Y + 1,
+%	 member(XX,[Xminus,X,Xplus]),
+%	 member(YY,[Yminus,Y,Yplus]),
+%	 mymap(XX,YY,Obj),
+%	 \+ member((XX,YY),[(X,Y)|Rest]),
+%	 (
+%	  mygoal(Obj)
+%	 ;
+%	  member(Obj,[o,door])
+%	 ;
+%	  can_remove(Obj) %this should possibly be changed to desireable.
+%	 )
+%	),
+%	Paths).
+
+
+get_cost(XX,YY,X,Y,Cost):- 
+	S1 is sign(XX), % sign returns -1, 0 or 1 
+	S2 is sign(X), % depending on sign of the term 
+	S3 is sign(YY), 
+	S4 is sign(Y), 
+	(((S1=:= -1, S2=:= -1); % if XX & X are both negative 
+	(S1=:= 1, S2=:= 1); % or are both positive 
+	S1=:= 0 ; % or one of them is zero 
+	S2=:= 0) -> 
+	X_diff is abs(XX-X); % then just subtract (& abs) 
+	((S1=:= 1, S2=:= -1); % if XX = pos & X = neg 
+	(S1=:= -1, S2=:= 1)) -> % or XX = neg & X = pos 
+	(XX_abs is abs(XX), % then get the absolute value 
+	X_abs is abs(X), % same for X 
+	X_diff is abs(XX_abs + X_abs)); true), % add them in this case 
+	(((S3=:= -1, S4=:= -1); % same thing for YY & Y 
+	(S3=:= 1, S4=:= 1); 
+	S3=:= 0; 
+	S4=:= 0) -> 
+	Y_diff is abs(YY-Y); 
+	((S3=:= 1, S4=:= -1); 
+	(S3=:= -1, S4=:= 1)) -> 
+	(YY_abs is abs(YY), 
+	Y_abs is abs(Y), 
+	Y_diff is abs(YY_abs + Y_abs)); true), 
+	Cost is max(X_diff,Y_diff). % simply take the max 
+
+
+add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
+	append([First],CLOSED,New_CLOSED). % append as a list..[First] 
+
+
+get_closest([(X,Y,Goal)|Restof], X_Goal,Y_Goal):- 
+	X_Goal = X, 
+	Y_Goal = Y . 
 
 
 % These are the objects that the agent can remove
@@ -412,15 +513,19 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
 	eat(Strength,Damage),
 	here(Current_X,Current_Y),
-	last_seen(tree,Goal_X,Goal_Y),
+%	last_seen(tree,Goal_X,Goal_Y),
 	nl, write('Hungry, already seen a tree'),
 	%find_path_to(X,Y),
-	nl, write('Gloal X :'), write(Goal_X), write('Y :') , write(Goal_Y),
-	nl, write('Current X :'), write(Current_X), write('Y :') , write(Current_Y),
-	find_path(breadth_first,(Goal_X,Goal_Y),(Current_X,Current_Y),Path),
+	Path = [],
+	Goal = tree,
+%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
+	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
+	% Note this should be moved to looking for just teee and not being passsed the goal position..
+	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
 	nl, write('Search Completed'),
 	printxyo(Path).
 
+%YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
 printxyo(List) :-
 	List = [],	
@@ -699,15 +804,16 @@ update_bumble_map(BX,BY,[_,_,_,_,
 		[SWSW,SSW,SS,SSE,SESE]]):-	% V5
 	here(BX,BY),
 	findall((X,Y,Obj),
-	(member(Obj,[NWNW,NNW,NN,NNE,NENE,
-		WNW,NW,N,NE,ENE,WW,W,E,EE,
-		WSW,SW,S,SE,ESE,SWSW,SSW,SS,SSE,SESE],Pos),
-	member((XX,YY),[(-2,-2),(-1,-2),(0,-2),
-		(1,-2),(2,-2),(-2,-1),(-1,-1),
-		(0,-1),(1,-1),(2,-1),(-2,0),
-		(-1,0),(1,0),(2,0),(-2,1),(-1,1),
-		(0,1),(1,1),(2,1),(-2,2),(-1,2),
-		(0,2),(1,2),(2,2)],Pos),
+		(member(Obj,[NWNW,NNW,NN,NNE,NENE,
+			WNW,NW,N,NE,ENE,WW,W,E,EE,
+			WSW,SW,S,SE,ESE,SWSW,SSW,SS,SSE,SESE],Pos),
+		member((XX,YY),[(-2,-2),(-1,-2),(0,-2),
+			(1,-2),(2,-2),(-2,-1),(-1,-1),
+			(0,-1),(1,-1),(2,-1),(-2,0),
+			(-1,0),(1,0),(2,0),(-2,1),(-1,1),
+			(0,1),(1,1),(2,1),(-2,2),(-1,2),
+			(0,2),(1,2),(2,2)],
+		Pos),
 	X is BX+XX,
 	Y is BY+YY ),
 	List),
