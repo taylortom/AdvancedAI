@@ -288,6 +288,8 @@ insert_nodes(Set1,Set2,Sorted):-
 	append(Set2,Set1,Set3), 
 	sort(Set3,Sorted,[1]). % do something clever! 
 
+
+
 % find_path(SearchType,Goal,Start,Path) searches for a list of
 % coordinates (a Path) that leads from the agent's current 
 % location Start (of the form (X,Y)) to a location where
@@ -327,26 +329,26 @@ solution([(X,Y)|_]) :-
 % have to define generate_new_nodes/3 differently for a
 % different domain.
 
-generate_new_nodes([(X,Y)|Rest],Paths) :-
-	findall([(XX,YY),(X,Y)|Rest],
+generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
+	findall([Cost,(XX,YY),(X,Y)|Rest], % given these terms
 	(
-	 Xminus is X - 1,
-	 Xplus is X + 1,
-	 Yminus is Y - 1,
-	 Yplus is Y + 1,
-	 member(XX,[Xminus,X,Xplus]),
-	 member(YY,[Yminus,Y,Yplus]),
-	 mymap(XX,YY,Obj),
-	 \+ member((XX,YY),[(X,Y)|Rest]),
-	 (
-	  mygoal(Obj)
-	 ;
-	  member(Obj,[o,door])
-	 ;
-	  can_remove(Obj)
-	 )
+		Xminus is X - 1, % generate X,Y coordinates
+		Xplus is X + 1, % for all the neighbouring tiles
+		Yminus is Y - 1, % relative to the current X,Y
+		Yplus is Y + 1,
+		member(XX,[Xminus,X,Xplus]), % XX becomes bound to values in list
+		member(YY,[Yminus,Y,Yplus]), % findall will get all combinations
+		mymap(XX,YY,Obj), % get whatever object is at that location
+		\+ member((XX,YY),[(X,Y)|Rest]), % have we been here before? (loop detect)
+		(
+			mygoal(Obj) % it could be the goal (hopefully!)
+			; % or
+			member(Obj,[o,door]) % it could be a door or open
+			; % or
+			can_remove(Obj) % it can be an object he can remove
+		), get_cost(XX,YY,Goal_X,Goal_Y,Cost) % h(n)calculation
 	),
-	Paths).
+	Paths). % this is the list of possible locations
 
 
 
@@ -384,13 +386,64 @@ search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node
 	solution(FirstNode). % goal tile? 
 	
 
-search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
-	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % next poss 
+%search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
+%	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % next poss 
+%	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
+%	!, 
+%	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % add to CLOSED 
+%	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2),	% better path on CLOSED?
+%	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush,
+%	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush,
+%	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes_2).	 
+	
+
+ search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) :- % from the current tile 
+	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % generate next poss tiles 
 	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
 	!, 
-	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % add to CLOSED 
-	search(NextSetOfNodes,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes).	 
-	
+	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % put the next node (best) on CLOSED 
+	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
+	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
+	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
+	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2). % recurse with new list 
+
+
+
+check_CLOSED([First|Rest],[D|CLOSED],NextSetOfNodes_2):- % strip off the first (best?) 
+	CLOSED = [] -> NextSetOfNodes_2 = [First|Rest]; % empty? Do nothing 
+	(First=[A,B|Closed], % gets the cost & head of First 
+	findall(Best_path, 
+	( 
+	member([C1,B|Closed],CLOSED,Pos), % is the node (B) in CLOSED? 
+	mem(CLOSED,[Pos],Best_path) % gets the path at Pos 
+	), 
+	Paths)), 
+	sort(Paths, Sorted_paths,[1]), % sort them on Cost 
+	Sorted_paths = [Best|_], % retrieve the best path 
+	Best = [C|_], % retrieve the cost of best 
+	C<A -> % is the cost smaller on CLOSED? 
+	append([Best],Rest,NextSetOfNodes_2); % append as a list.. [First] 
+	NextSetOfNodes_2 = [First|Rest]. % else send original list back 
+
+check_CLOSED2([First|Rest],[New_addition|CLOSED],NextSetOfNodes_2):- % strip off the first (best?) 
+	CLOSED = [] -> NextSetOfNodes_2 = [First|Rest] ; % empty list? do nothing 
+	(First=[A,B,C,D|Closed], % gets the cost & head of First 
+	findall(Best_path, 
+	( 
+	member([_,_,_,D|Closed],CLOSED,Pos), % is the node (B) in CLOSED? 
+	mem(CLOSED,[Pos],Best_path) % gets the path at Pos 
+	), 
+	Paths)), 
+	sort(Paths, Sorted_paths,[1]), % sort them on Cost 
+	Sorted_paths = [Best|_], % retrieve the best path 
+	Best = [Fn,_,_|_], % retrieve the cost of best 
+	Fn<A -> % is the cost smaller on CLOSED? 
+	append([Best],Rest,NextSetOfNodes_2); % append as a list.. [First] 
+	NextSetOfNodes_2 = [First|Rest]. 
+	add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
+	append([First],CLOSED,New_CLOSED). % append as a list.. 
+
+
 add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
 	append([First],CLOSED,New_CLOSED). % append as a list.. [First] 
 
@@ -477,26 +530,26 @@ get_cost(XX,YY,X,Y,Cost):-
 	S3 is sign(YY), 
 	S4 is sign(Y), 
 	(((S1=:= -1, S2=:= -1); % if XX & X are both negative 
-	(S1=:= 1, S2=:= 1); % or are both positive 
-	S1=:= 0 ; % or one of them is zero 
-	S2=:= 0) -> 
+		(S1=:= 1, S2=:= 1); % or are both positive 
+		S1=:= 0 ; % or one of them is zero 
+		S2=:= 0) -> 
 	X_diff is abs(XX-X); % then just subtract (& lllllllllllabs) 
 	((S1=:= 1, S2=:= -1); % if XX = pos & X = neg 
-	(S1=:= -1, S2=:= 1)) -> % or XX = neg & X = pos 
-	(XX_abs is abs(XX), % then get the absolute value 
-	X_abs is abs(X), % same for X 
-	X_diff is abs(XX_abs + X_abs)); true), % add them in this case 
+		(S1=:= -1, S2=:= 1)) -> % or XX = neg & X = pos 
+		(XX_abs is abs(XX), % then get the absolute value 
+		X_abs is abs(X), % same for X 
+		X_diff is abs(XX_abs + X_abs)); true), % add them in this case 
 	(((S3=:= -1, S4=:= -1); % same thing for YY & Y 
-	(S3=:= 1, S4=:= 1); 
-	S3=:= 0; 
-	S4=:= 0) -> 
-	Y_diff is abs(YY-Y); 
+		(S3=:= 1, S4=:= 1); 
+		S3=:= 0; 
+		S4=:= 0) -> 
+		Y_diff is abs(YY-Y); 
 	((S3=:= 1, S4=:= -1); 
-	(S3=:= -1, S4=:= 1)) -> 
-	(YY_abs is abs(YY), 
-	Y_abs is abs(Y), 
-	Y_diff is abs(YY_abs + Y_abs)); true), 
-	Cost is max(X_diff,Y_diff). % simply take the max 
+		(S3=:= -1, S4=:= 1)) -> 
+		(YY_abs is abs(YY), 
+		Y_abs is abs(Y), 
+		Y_diff is abs(YY_abs + Y_abs)); true), 
+		Cost is max(X_diff,Y_diff). % simply take the max 
 
 
 
@@ -517,6 +570,31 @@ can_remove(o).
 
 
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+%
+%
+% SPENCER TEST CLAUSE
+%
+%
+
+bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
+	%fail,
+	eat(Strength,Damage),
+	here(Current_X,Current_Y),
+	last_seen(tree,Goal_X,Goal_Y),
+	nl, write('Hungry, already seen a tree'),
+	%find_path_to(X,Y),
+	Path = [],
+	Goal = tree,
+	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
+	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
+	% Note this should be moved to looking for just teee and not being passsed the goal position..
+	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
+	nl, write('Search Completed'),
+	printxyo(Path).
+
+%YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+
 
 
 
@@ -586,30 +664,6 @@ find_path_to(_,_):-
 	nl, write('Already following a path: '), write(Path).
 
 	
-%
-%
-% SPENCER TEST CLAUSE
-%
-%
-
-%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	%fail,
-%	eat(Strength,Damage),
-%	here(Current_X,Current_Y),
-%	last_seen(tree,Goal_X,Goal_Y),
-%	nl, write('Hungry, already seen a tree'),
-	%find_path_to(X,Y),
-%	Path = [],
-%	Goal = tree,
-%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
-%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
-	% Note this should be moved to looking for just teee and not being passsed the goal position..
-%	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
-%	nl, write('Search Completed'),
-%	printxyo(Path).
-
-%YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
-
 
 
 printxyo(List) :-
@@ -804,6 +858,7 @@ threatening(witch).
 
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	exploration,
+	fail,
 	member(o,[NW,N,NE,W,E,SW,S,SE],Pos),
 	check_visited(Pos),
 	nl, write('Exploring...open space at: '), write(Pos),
