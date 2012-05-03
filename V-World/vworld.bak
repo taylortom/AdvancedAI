@@ -1806,10 +1806,14 @@ vact(hornet,X,Y) :-
  	vstatus_report.
 
 vact(hornet,X,Y) :-
+	vfollow(hornet,a,X,Y).
+
+vact(hornet,X,Y) :-
 	vpatrol(hornet,X,Y).
 
 vact(hornet,X,Y) :-
  	vmove_at_random(hornet,X,Y).
+
 
 % SNAILS
 %

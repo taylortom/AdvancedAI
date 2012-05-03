@@ -230,15 +230,15 @@ bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE]
 
 
 
-insert_nodes(Set1,Set2,Set3) :-
-	search_type(depth_first),
-	append(Set1,Set2,Set3).
+%insert_nodes(Set1,Set2,Set3) :-
+%	search_type(depth_first),
+%	append(Set1,Set2,Set3).
 
 % For breadth first search, put new nodes at back of queue.
 
-insert_nodes(Set1,Set2,Set3) :-
-	search_type(breadth_first),
-	append(Set2,Set1,Set3).
+%insert_nodes(Set1,Set2,Set3) :-
+%	search_type(breadth_first),
+%	append(Set2,Set1,Set3).
 
 % For greedy search, need to sort the queue best at front = smallest h(n). 
 % first append to complete the list & then do a sort. sort/3 takes 
@@ -341,7 +341,7 @@ find_path(SearchType,Goal,Start,Path) :-
 %	reverse(ReversedPath,Path). % reverse it start-to-goal path 
 
 
-	search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
+search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
 	solution(FirstNode). % goal tile? 
 	
 
@@ -350,11 +350,12 @@ search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:-
 	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
 	!, 
 	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % add to CLOSED 
-	search(NextSetOfNodes,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes). 
+	search(NextSetOfNodes,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes),
+	write(CLOSED),
+	write(OPEN). 
 	
 add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
 	append([First],CLOSED,New_CLOSED). % append as a list.. [First] 
-
 
 
 
@@ -442,7 +443,7 @@ get_cost(XX,YY,X,Y,Cost):-
 	(S1=:= 1, S2=:= 1); % or are both positive 
 	S1=:= 0 ; % or one of them is zero 
 	S2=:= 0) -> 
-	X_diff is abs(XX-X); % then just subtract (& abs) 
+	X_diff is abs(XX-X); % then just subtract (& lllllllllllabs) 
 	((S1=:= 1, S2=:= -1); % if XX = pos & X = neg 
 	(S1=:= -1, S2=:= 1)) -> % or XX = neg & X = pos 
 	(XX_abs is abs(XX), % then get the absolute value 
@@ -461,9 +462,6 @@ get_cost(XX,YY,X,Y,Cost):-
 	Cost is max(X_diff,Y_diff). % simply take the max 
 
 
-add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
-	append([First],CLOSED,New_CLOSED). % append as a list..[First] 
-
 
 get_closest([(X,Y,Goal)|Restof], X_Goal,Y_Goal):- 
 	X_Goal = X, 
@@ -477,6 +475,8 @@ can_remove(fruit).
 can_remove(gkey).
 can_remove(ykey).
 can_remove(bugspray).
+can_remove(o).
+
 
 
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -698,22 +698,25 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 % Currently only supports 8 point compass
 	%CordDirection(X,Y,DIR)
 
-	%South West
-	cordDirection(-1,-1,sw).
+
+%This is wrong..... TODO: FIX
+
+	%Noth West
+	cordDirection(-1,-1,nw).
 	%West
 	cordDirection(-1,0,w).
-	%North West
-	cordDirection(-1,1,nw).
-	%North
-	cordDirection(0,1,n).
 	%North East
+	cordDirection(-1,1,sw).
+	%South
+	cordDirection(0,1,n).
+	%South East
 	cordDirection(1,1,ne).
 	%East
 	cordDirection(1,0,e).
-	%South East
+	%North East
 	cordDirection(1,-1,se).
-	%South 
-	cordDirection(-1,0,s).
+	%North 
+	cordDirection(-1,0,n).
 
 
 
@@ -827,12 +830,24 @@ update_bumble_map_x([_|List]):-
 
 update_bumble_map_x([(X,Y,Obj)|_]):-
 	\+ Obj = cant_see,
-	\+ Obj = o,
+	%\+ Obj = o,
 	%\+ Obj = fruit,
 	\+ Obj = hornet,
 	\+ Obj = snail,
 	\+ Obj = bird,
-	\+ mymap(X,Y,_),
+	\+ mymap(X,Y,Obj),
+	retract(mymap(X,Y,_)),
+	nl, write('Removing changed object from map'),
+	fail.
+
+update_bumble_map_x([(X,Y,Obj)|_]):-
+	\+ Obj = cant_see,
+	%\+ Obj = o,
+	%\+ Obj = fruit,
+	\+ Obj = hornet,
+	\+ Obj = snail,
+	\+ Obj = bird,
+	\+ mymap(X,Y,Obj),
 	nl, write('Adding '), write(Obj), write(' to mymap'),	
 	assert(mymap(X,Y,Obj)),
 	fail.

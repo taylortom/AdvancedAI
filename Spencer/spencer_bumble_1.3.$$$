@@ -114,10 +114,12 @@ update_bumble_map(BX,BY,[_,_,_,_,
 
 % add items to bubmle map 
 
-update_bumble_map_x( [(X,Y,Obj) |ListTail] ):-
-	updateMap_Insert(X,Y,Obj),
-	update_bumble_map_x(ListTail).
+%update_bumble_map_x([]).
 
+update_bumble_map_x( [(X,Y,Obj) |ListTail] ):-
+	write('update bumble map called'),
+	update_bubmle_inner(X,Y,Obj),
+	update_bumble_map_x(ListTail).
 
 update_bubmle_inner( X, Y, Obj) :-
 	\+ Obj = cant_see,
@@ -125,6 +127,10 @@ update_bubmle_inner( X, Y, Obj) :-
 
 update_bubmle_inner( X, Y, Obj) :-
 	write(' can see ').
+
+%update_bumble_map_x( [_|ListTail] ):-
+%	write(' cant see '),
+%	update_bumble_map_x(ListTail).
 
 %updateMap_Insert(X,Y,Obj):-
 %	X =: [X | ListHead],
@@ -302,7 +308,7 @@ desirable(bugspray).
 
 permanent(cross).
 permanent(throne).
-permanent(tree).
+%permanent(tree).
 permanent(w).
 
 

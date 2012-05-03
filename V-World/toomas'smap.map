@@ -1,0 +1,31 @@
+% Toomas'sMap.map
+% A Virtual World
+author('Toomas').
+date_created('5/3/2012').
+last_modified('5/3/2012').
+
+:- dynamic [vagent_data/5,vmap/3,vobject_icon/2,veff/3,vact/3,vkey/7,vcurrent_level/1,
+            vmovable/1,vcollectable/1,vmulticollectable/1,vconsumable/1,vanimate/1,vguard/2].
+
+:- multifile vobject_icon/3, veff/3, vconsumable/1, vcollectable/1, vmulticollectable/1,
+             vact/3, vreact/3, v_icon/3, vnature/0, vguard/2, vwants/2, vfears/2,
+             vdrop_effect/2.
+
+
+% vguard/2
+
+
+% vkey/7
+
+
+% vwants/2
+
+
+% vfears/2
+
+
+% vnature/1
+
+
+% vgoal_to_catch_bird/0
+

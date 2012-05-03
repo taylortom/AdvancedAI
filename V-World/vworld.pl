@@ -37,7 +37,7 @@ vstartup :-
 	  msgbox(`Error in Program`,Message,16'00000031,_)
 	 )
 	),
-	halt(0). 
+	halt(0).
 
 % vmain calls the initialization routines, starts the VWORLD 
 % window handler, and closes the window and menus when the dialog ends.   
