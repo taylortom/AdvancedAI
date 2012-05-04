@@ -338,7 +338,7 @@ generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
 		(
 			mygoal(Obj) % it could be the goal (hopefully!)
 			; % or
-			member(Obj,[o,door]) % it could be a door or open
+			member(Obj,[o,v,door]) % it could be a door or open or visited.
 			; % or
 			can_remove(Obj) % it can be an object he can remove
 		), get_cost(XX,YY,Goal_X,Goal_Y,Cost) % h(n)calculation
@@ -624,20 +624,65 @@ update_bumble_path_x([_|RestOfList]):-
 %
 
 % Check if we're already following a path
-
-bumble(_,_) :-	 
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-	 
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
 	Path = [(NewX,NewY)|_],
 	here(CurrentX,CurrentY),
-	nl, write('NextMove('), write(NewX), write(','), write(NewY), write(')'),
+	nl, write('CurrentPosition('), write(CurrentX), write(','), write(CurrentY), write(')'), ttyflush,
 	retract(path(NewX,NewY)),
-	nl, write('NextMove('), write(NewX), write(','), write(NewY), write(')'),
+	nl, write('NextPosition('), write(NewX), write(','), write(NewY), write(')'), ttyflush,
 %	findDirection(CurrentX,CurrentY,NewX, NewY, DIR),
-	CalX is NewX - CurrentX,
-	CalY is NewY - CurrentY,
-	coordDirection(CalX, CalY , DIR),
-	nl, write('DIR is '), write(DIR).
+%	CalX is NewX - CurrentX,
+%	CalY is NewY - CurrentY,
+%	S1 is sign(CurrentX), % sign returns -1, 0 or 1 
+%	S2 is sign(NewX), % depending on sign of the term 
+%	S3 is sign(CurrentY), 
+%	S4 is sign(NewY), 
+%	nl, write('S1 is '), write(S1), write(' S2 is '), write(S2), write(' S3 is '), write(S3), write(' S4 is '),  write(S4), ttyflush,	
+	heading(CurrentX, NewX, X_Mov),
+	heading(CurrentY, NewY, Y_Mov),
+	nl, write('X_Mov is '), write(X_Mov), write(' Y_Mov is '), write(Y_Mov),ttyflush,
+	coordDirection(X_Mov, Y_Mov, DIR),
+	nl, write('DIR is '), write(DIR),
+	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
+	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
+
+
+%	(((S1=:= 1, S2=:=1); S1=:= 0; s2=:0
+%(((S1=:= -1, S2=:= -1); % if XX & X are both negative 
+%		(S1=:= 1, S2=:= 1); % or are both positive 
+%		S1=:= 0 ; % or one of them is zero 
+%		S2=:= 0) -> 
+%	X_diff is abs(CurrentX-NewX); % then just subtract (& lllllllllllabs) 
+%	((S1=:= 1, S2=:= -1); % if XX = pos & X = neg 
+%		(S1=:= -1, S2=:= 1)) -> % or XX = neg & X = pos 
+%		(XX_abs is abs(CurrentX), % then get the absolute value 
+%		X_abs is abs(NewX), % same for X 
+%		X_diff is abs(XX_abs + X_abs)); true), % add them in this case 
+%	(((S3=:= -1, S4=:= -1); % same thing for YY & Y 
+%		(S3=:= 1, S4=:= 1); 
+%		S3=:= 0; 
+%		S4=:= 0) -> 
+%		Y_diff is abs(CurrentY-NewY); 
+%	((S3=:= 1, S4=:= -1); 
+%		(S3=:= -1, S4=:= 1)) -> 
+%		(YY_abs is abs(CurrentY), 
+%		Y_abs is abs(NewY), 
+%		Y_diff is abs(YY_abs + Y_abs)); true), 
+
+heading(Current, Next, Val) :-
+	Current < Next, 
+	Val is 1.
+
+heading(Current, Next, Val) :-
+	Current > Next, 
+	Val is -1.
+
+heading(Current, Next, Val) :-
+	Current = Next, 
+	Val is 0.
+
 
 %ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -851,30 +896,32 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 %     CoordDirection(X,Y,DIR)
 %
 
-	coordDirection(-2,-2,nwnw).
-	coordDirection(-1,-2,nnw).
-	coordDirection(0,-2,nn).
-	coordDirection(1,-2,nne).
-	coordDirection(2,-2,nene).
-	coordDirection(-1,-2,wnw).
+%NB: I have commented out spaces two steps away as bubmble can only move one set at a time
+
+%	coordDirection(-2,-2,nwnw).
+%	coordDirection(-1,-2,nnw).
+%	coordDirection(0,-2,nn).
+%	coordDirection(1,-2,nne).
+%	coordDirection(2,-2,nene).
+%	coordDirection(-1,-2,wnw).
 	coordDirection(-1,-1,nw).
 	coordDirection(0,-1,n).
 	coordDirection(1,-1,ne).
-	coordDirection(2,-1,ene).
-	coordDirection(-2,0,ww).
+%	coordDirection(2,-1,ene).
+%	coordDirection(-2,0,ww).
 	coordDirection(-1,0,w).
 	coordDirection(1,0,e).
-	coordDirection(2,0,ee).
-	coordDirection(-2,1,wsw).
+%	coordDirection(2,0,ee).
+%	coordDirection(-2,1,wsw).
 	coordDirection(-1,1,sw).
 	coordDirection(0,1,s).	
 	coordDirection(1,1,se).
-	coordDirection(2,1,ese).
-	coordDirection(-2,2,swsw).
-	coordDirection(-1,2,ssw).
-	coordDirection(0,2,ss).
-	coordDirection(1,2,sse).
-	coordDirection(2,2,sese).
+%	coordDirection(2,1,ese).
+%	coordDirection(-2,2,swsw).
+%	coordDirection(-1,2,ssw).
+%	coordDirection(0,2,ss).
+%	coordDirection(1,2,sse).
+%	coordDirection(2,2,sese).
 
 % Trees, red croses, and birds are interesting.
 
