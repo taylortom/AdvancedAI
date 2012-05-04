@@ -584,6 +584,8 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
 	eat(Strength,Damage),
 	here(Current_X,Current_Y),
+	findall((X,Y),path(X,Y),NPath),
+	NPath = [], % if the path null
 	last_seen(tree,Goal_X,Goal_Y),
 %	retractall(mygoal(_)), Bad this is defined automatically in search!
 %	assert(mygoal(tree)),
@@ -592,8 +594,10 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	Goal = tree,
 	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
 	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
-	% Note this should be moved to looking for just teee and not being passsed the goal position..
 	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
+%	assert(path(Path)),
+%	assert(update_bumble_path_x(Path)),
+	update_bumble_path_x(Path),
 	nl, write(' Path: ' - Path),nl,ttyflush, 
 	nl, write('Search Completed').
 %YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
@@ -601,8 +605,19 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 
 
 
+update_bumble_path_x([_|List]):-
+	List = [],
+	true.
 
+update_bumble_path_x([(X,Y)|_]):-
+	\+ path(X,Y),
+	retractall(path(X,Y)),
+	assert(path(X,Y)),
+	nl, write('Adding '), write(X),write(Y), write(' to path'),
+	fail.
 
+update_bumble_path_x([_|RestOfList]):- 
+	update_bumble_path_x(RestOfList).
 
 
 
