@@ -37,7 +37,7 @@ vstartup :-
 	  msgbox(`Error in Program`,Message,16'00000031,_)
 	 )
 	),
-	halt(0). 
+	halt(0).
 
 % vmain calls the initialization routines, starts the VWORLD 
 % window handler, and closes the window and menus when the dialog ends.   
@@ -1792,14 +1792,16 @@ vreact(tree,_,_).
 % they will move at random.  
 
 vanimate(hornet). 
-
-veff(hornet,-1,25).
  
 vreact(hornet,X,Y) :-
  	vfind_in_inventory(bugspray),
  	vdraw(X,Y,o).  
 
+veff(hornet,-1,25):-
+	\+ vfind_in_inventory(bugspray).
+
 vact(hornet,X,Y) :-
+	\+ vfind_in_inventory(bugspray),
  	vlocate(X,Y,a,_,_),
  	!,
  	vinjure(3),

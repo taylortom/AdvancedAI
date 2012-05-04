@@ -1792,14 +1792,16 @@ vreact(tree,_,_).
 % they will move at random.  
 
 vanimate(hornet). 
-
-veff(hornet,-1,25).
  
 vreact(hornet,X,Y) :-
  	vfind_in_inventory(bugspray),
  	vdraw(X,Y,o).  
 
+veff(hornet,-1,25):-
+	\+ vfind_in_inventory(bugspray).
+
 vact(hornet,X,Y) :-
+	\+ vfind_in_inventory(bugspray),
  	vlocate(X,Y,a,_,_),
  	!,
  	vinjure(3),
@@ -1863,10 +1865,6 @@ vcollectable(bird).
 
 vcollectable(birdseed).
 
-vavoid(bird,a).
-
-veff(bird,-1,0).
-
 vact(bird,X,Y) :-
 	one((
 		 vwants(bird,Object)
@@ -1875,6 +1873,10 @@ vact(bird,X,Y) :-
 	   )),
 	\+ vfind_in_inventory(Object),
 	vescape(bird,X,Y).
+
+vavoid(bird,a).
+
+veff(bird,-1,0).
 
 vact(bird,X,Y) :-
 	vmove_at_random(bird,X,Y).
