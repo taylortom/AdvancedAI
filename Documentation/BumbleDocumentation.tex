@@ -1,0 +1,189 @@
+\documentclass[a4paper,oneside]{report}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage[english]{babel}
+\usepackage{fancyhdr} 
+\usepackage{float}
+\usepackage{multirow}
+\usepackage[pdftex]{graphicx}
+\usepackage{listings}      
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{wrapfig}
+
+\lstset{language=C,
+numberstyle=\footnotesize,
+%basicstyle=\ttfamily\footnotesize,
+basicstyle=\footnotesize,
+numbers=left,
+stepnumber=1,
+frame= lines,
+breaklines=true}
+
+\makeatletter
+
+
+%
+% Some custom definitions
+%
+
+% add horizontal lines
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\HRuleLight}{\rule{\linewidth}{0.1mm}}
+
+% custom part page
+\def\part#1#2
+{
+	\par\break
+  	\addcontentsline{toc}{part}{#1}
+	\noindent
+	\null	
+	\HRuleLight\\[0.0cm]
+	\vspace{20pt}	 
+	\begin{flushright} 		
+  	{\Huge \bfseries \noindent #1}\\
+  	\vspace{30pt} 
+	\begin{minipage}{0.85\textwidth}
+		\begin{flushright}
+		{\large \noindent #2}
+		\end{flushright}
+	\end{minipage}\\[0.75cm] 
+	\end{flushright} 		
+	\thispagestyle{empty}
+	\break
+}
+
+% chapter header
+\renewcommand{\@makechapterhead}[1]
+{\vspace*{50\p@}{
+	\parindent \z@ \raggedright \normalfont	%\huge \bfseries \thechapter. #1
+	\huge \bfseries #1	\vspace{20pt}}}
+
+\setcounter{secnumdepth}{-1} 
+\onehalfspace
+\oddsidemargin 1in 
+\oddsidemargin 0.6in 
+\topmargin -0.3in
+\setlength{\textwidth}{14cm}
+\setlength{\textheight}{23cm}
+\lstset{language=C} 
+
+\begin{document}
+
+%
+% Cover page
+%
+\begin{titlepage}
+\begin{center}
+
+\Huge Donald Nute's VWorld\\ 
+\huge \emph{Bumble 2.0}
+
+\HRuleLight\\[0.5cm]
+
+\begin{minipage}{0.45\textwidth}
+	\begin{flushleft}\large
+		\emph{Author:}\\
+			\textbf{James P. \textsc{Spencer}}\\[0.27cm]
+			Computer Science (Games)
+			Student Number:
+	\end{flushright}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+	\begin{flushright}\large
+		\emph{Author:}\\
+			\textbf{Thomas J. \textsc{Taylor}}\\[0.27cm]
+			Computer Science (Games)
+			Student Number: 08813043
+	\end{flushleft}
+\end{minipage}\\[0.75cm] 
+
+\HRuleLight\\[0.2cm]
+
+\large School of Computing, Engineering and Mathematics\\ \textbf{University of Brighton}
+
+\vfill
+\huge Documentation\\
+\large April, 2012\\
+
+\end{center}
+\end{titlepage}
+
+% reset page count
+\setcounter{page}{1}
+
+
+\section{Project Aim}
+
+You will be working on Donald Nute's V-World throughout the majority of the workshop programme, and will have soon completed workshop exercises designed to experiment with the world, its actors and its main (adventurer) agent "Bumble."
+This assignment is simple and extremely open-ended:
+
+\begin{quotation} Modify aspects of the program to make the behaviour of the actors (including Bumble) more 'interesting' than it is at the end of the formal workshops \end{quotation}
+
+\section{Ideas}
+
+Interesting behaviour could be characterised in many ways, but the following is indicative:
+
+\begin{itemize}
+\item The (demonstrated) ability of Bumble to deliberate about its situation
+\item The (demonstrated) ability of Bumble to react to changes in the world
+\item The ability of Bumble to demonstrate intelligent decisions about actions
+\item Actors in the world to demonstrate an enhanced level of intelligent behaviouretc.
+\item Proof of the success of your modifications could be:
+\item Behaviour based on a given set of scenarios - comparison with Bumble 1.1 \& 1.2 say
+\item Performance measured against V-World's number of moves before (RIP)
+etc.
+\end{itemize}
+
+\section{Deliverables}
+
+\textbf{To be submitted}: Thursday 10 May, 2012 by 8:45am\\
+
+\noindent \textbf{(a) The program} - submission details to be arranged\\
+\textbf{(b) Documentation} - submitted both in written \& electronic form
+
+\emph{This should be structured in the normal way for such documents, e.g.  introduction, strategy, modifications made (with relevant code snippets), test plan, outcomes, further work, conclusions. It should support the program and be around 3000 words}
+
+\section{Marking Criteria}
+
+\begin{itemize}
+\item The system is functional according to the specifications, i.e. new behaviour demonstrated - it works: 20\%
+\item Level of sophistication in the new behaviour(s): 30\%
+\item The code is well-structured, documented and annotated (it is clear and accessible): 10\%
+\item The documentation as specified: 40\%
+\end{itemize}
+
+
+
+
+
+\section{Introduction}
+
+\section{Strategy}
+
+\section{Modifications}
+
+\section{Test Plan}
+
+\section{Outcomes}
+
+\section{Further Work}
+
+\section{Conclusions}
+
+
+
+
+
+
+\appendix
+\onehalfspace
+
+\newpage
+\section{Appendix X: jfkdsgkjfdksljgklfdlkgjlkfd}
+
+
+\end{document}

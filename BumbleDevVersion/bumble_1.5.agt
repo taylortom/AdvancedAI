@@ -231,24 +231,6 @@ bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE]
 	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
 	move_toward_x(GoToward,Dir).
 
-% If there's something interesting two squares away, move towards it
-
-bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
-	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
-	interesting(Obj),
-	\+ Obj = tree,
-	\+ Obj = cross, 
-	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
-	move_toward_x(GoToward,Dir).
-
-% If there's something desirable two squares away, move towards it
-
-bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
-	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
-	desirable(Obj),
-	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
-	move_toward_x(GoToward,Dir).
-
 
 %
 %
@@ -796,9 +778,14 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	desirable(Obj), % not sure if this is needed?
 	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
 	write(Last),
-	\+ Last = Dir,
+	\+ Dir = same, ! ,
 	move_toward_x(GoToward,Dir),
 	nl, write('Something desirable!! move towards it!! '), write(Dir).
+
+
+
+
+
 
 
 /* 
@@ -938,13 +925,18 @@ threatening(dragon).
 threatening(troll).
 threatening(witch).
 
+% Exploration
+
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	exploration,
-	member(o,[NW,N,NE,E,SE,S,SW,W],Pos),
+	%member(o,[NE,NW,SE,SW,N,E,S,W],Pos),
+	member(o,[NW,N,NE,W,E,SW,S,SE],Pos),
 	check_visited(Pos),
 	nl, write('Exploring...open space at: '), write(Pos),
-	write([NW,N,NE,E,SE,S,SW,W]),
-	member(Dir,[nw,n,ne,e,se,s,sw,w],Pos).
+	%write([NE,NW,SE,SW,N,E,S,W]),
+	write([NW,N,NE,W,E,SW,S,SE]),
+	%member(Dir,[ne,nw,se,sw,n,e,s,w],Pos).
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos).
 
 % About 87% of the time, move in the direction you went
 % last if it is clear.
@@ -971,9 +963,14 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 
 bumble(_,sit).
 
+
+%
+% Exploration
+%
+
 check_visited(Pos):-
-	member((XX,YY),[(-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)],Pos),
-	%member((XX,YY),[(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)],Pos),
+	%member((XX,YY),[(1,-1),(-1,-1),(1,1),(-1,1),(0,-1),(1,0),(0,1),(-1,0)],Pos),
+	member((XX,YY),[(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)],Pos),
 	here(X,Y),
 	TempX is X+XX,
 	TempY is Y+YY,
