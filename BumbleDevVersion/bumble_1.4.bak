@@ -312,7 +312,9 @@ insert_nodes(Set1,Set2,Sorted):-
 
 solution([(X,Y)|_]) :-
 	mygoal(Goal),
+	nl,write('Solution Passed:'),write(X),write(Y),nl,ttyflush, ! . % print it - final path 
 	mymap(X,Y,Goal).
+
 
 % generate_new_nodes(Path,Goal,Paths) finds (almost) all
 % legal Paths that extend Path by exactly one step in any 
@@ -382,8 +384,9 @@ find_path(SearchType,Goal,Start,Path) :-
 %	reverse(ReversedPath,Path). % reverse it start-to-goal path 
 
 
-search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
-	solution(FirstNode). % goal tile? 
+search([[_|FirstCord]|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
+%	nl, write(' First Node Is : ' - FirstNode),nl,ttyflush, 
+	solution(FirstCord). % goal tile? 
 	
 
 %search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
@@ -402,7 +405,7 @@ search([FirstNode|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node
 	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
 	!, 
 	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % put the next node (best) on CLOSED 
-	check_CLOSED2(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
+	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
 	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
 	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
 	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2). % recurse with new list 
@@ -582,17 +585,17 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	eat(Strength,Damage),
 	here(Current_X,Current_Y),
 	last_seen(tree,Goal_X,Goal_Y),
+%	retractall(mygoal(_)), Bad this is defined automatically in search!
+%	assert(mygoal(tree)),
 	nl, write('Hungry, already seen a tree'),
 	%find_path_to(X,Y),
-	Path = [],
 	Goal = tree,
 	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
 	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
 	% Note this should be moved to looking for just teee and not being passsed the goal position..
 	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
-	nl, write('Search Completed'),
-	printxyo(Path).
-
+	nl, write(' Path: ' - Path),nl,ttyflush, 
+	nl, write('Search Completed').
 %YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
 
