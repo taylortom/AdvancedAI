@@ -384,9 +384,9 @@ find_path(SearchType,Goal,Start,Path) :-
 %	reverse(ReversedPath,Path). % reverse it start-to-goal path 
 
 
-search([[_|FirstCord]|_],FirstNode,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
+search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
 %	nl, write(' First Node Is : ' - FirstNode),nl,ttyflush, 
-	solution(FirstCord). % goal tile? 
+	solution(Path). % goal tile? 
 	
 
 %search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 

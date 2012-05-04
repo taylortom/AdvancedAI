@@ -312,7 +312,7 @@ insert_nodes(Set1,Set2,Sorted):-
 
 solution([(X,Y)|_]) :-
 	mygoal(Goal),
-	nl,write('Solution Passed:'),write(X),write(Y),nl,ttyflush, ! . % print it - final path 
+	nl,write('Solution Passed:'),write(X),write(Y),nl,ttyflush, !, % print it - final path 
 	mymap(X,Y,Goal).
 
 
