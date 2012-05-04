@@ -596,7 +596,8 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
 	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
 %	assert(path(Path)),
-	assert(update_bumble_path_x(Path)),
+%	assert(update_bumble_path_x(Path)),
+	update_bumble_path_x(Path),
 	nl, write(' Path: ' - Path),nl,ttyflush, 
 	nl, write('Search Completed').
 %YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY

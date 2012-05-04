@@ -1,0 +1,2 @@
+testAddition(X, Y, Z) :-
+Z = X+Y.

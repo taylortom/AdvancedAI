@@ -304,8 +304,9 @@ insert_nodes(Set1,Set2,Sorted):-
 
 solution([(X,Y)|_]) :-
 	mygoal(Goal),
-	nl,write('Solution Passed:'),write(X),write(Y),nl,ttyflush, !, % print it - final path 
-	mymap(X,Y,Goal).
+	mymap(X,Y,Goal),
+	nl,write('Solution Passed:'),write(X),write(Y),nl,ttyflush. % print it - final path 
+
 
 
 % generate_new_nodes(Path,Goal,Paths) finds (almost) all
@@ -337,7 +338,7 @@ generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
 		(
 			mygoal(Obj) % it could be the goal (hopefully!)
 			; % or
-			member(Obj,[o,door]) % it could be a door or open
+			member(Obj,[o,v,door]) % it could be a door or open or visited.
 			; % or
 			can_remove(Obj) % it can be an object he can remove
 		), get_cost(XX,YY,Goal_X,Goal_Y,Cost) % h(n)calculation
@@ -353,6 +354,7 @@ generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
 
 
 find_path(SearchType,Goal,Start,Path) :- 
+	nl,write('Find Path Called= ' - Goal),nl,ttyflush, % print it - final path 
 	retractall(search_type(_)), % house keeping 
 	assert(search_type(SearchType)), 
 	retractall(mygoal(_)), 
@@ -360,10 +362,11 @@ find_path(SearchType,Goal,Start,Path) :-
 	findall((X,Y,Goal), 
 		mymap(X,Y,Goal), 
 		Goals), 
+	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
 	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[]), 
 	reverse(ReversedPath,Path), % reverse it - start-to-goal 
-	nl,write('Path = ' - Path),nl,ttyflush, ! . % print it - final path 
+	nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
 
 
 
@@ -377,7 +380,7 @@ find_path(SearchType,Goal,Start,Path) :-
 
 
 search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
-%	nl, write(' First Node Is : ' - FirstNode),nl,ttyflush, 
+	nl, write(' First Node Is : ' - Path),nl,ttyflush, 
 	solution(Path). % goal tile? 
 	
 
@@ -578,15 +581,16 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	here(Current_X,Current_Y),
 	findall((X,Y),path(X,Y),NPath),
 	NPath = [], % if the path null
-	last_seen(tree,Goal_X,Goal_Y),
+%	last_seen(tree,Goal_X,Goal_Y),
 %	retractall(mygoal(_)), Bad this is defined automatically in search!
 %	assert(mygoal(tree)),
-	nl, write('Hungry, already seen a tree'),
+	nl, write('Hungry, check to see if i have seen a tree in my map'),nl,ttyflush,
 	%find_path_to(X,Y),
-	Goal = tree,
-	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y),
-	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y),
-	find_path(greedy, Goal,(Current_X,Current_Y),Path), 
+%	interesting(Obj),
+%	Obj = tree,
+%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
+	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
+	find_path(greedy, tree,(Current_X,Current_Y),Path), 
 %	assert(path(Path)),
 %	assert(update_bumble_path_x(Path)),
 	update_bumble_path_x(Path),
@@ -621,14 +625,22 @@ update_bumble_path_x([_|RestOfList]):-
 
 % Check if we're already following a path
 
-bumble(_,_) :-
-	 
+bumble(_,_) :-	 
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
 	Path = [(NewX,NewY)|_],
 	here(CurrentX,CurrentY),
 	nl, write('NextMove('), write(NewX), write(','), write(NewY), write(')'),
-	retract(path(NewX,NewY)).
+	retract(path(NewX,NewY)),
+	nl, write('NextMove('), write(NewX), write(','), write(NewY), write(')'),
+%	findDirection(CurrentX,CurrentY,NewX, NewY, DIR),
+	CalX is NewX - CurrentX,
+	CalY is NewY - CurrentY,
+	coordDirection(CalX, CalY , DIR),
+	nl, write('DIR is '), write(DIR).
+
+%ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 
 % Check if we've already seen a cross
 
@@ -675,7 +687,7 @@ find_path_to(_,_):-
 	findall((X,Y),path(X,Y),Path),
 	nl, write('Already following a path: '), write(Path).
 
-	
+
 
 
 printxyo(List) :-
@@ -825,6 +837,14 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	move_away_x(se,nw).
 	
 %%%%%%%%%%%%%% end of table of directions %%%%
+
+
+%%Find direction from two close nodes
+%coordDirection(CurrentX - CurrentY, NextX - NextY, DIR).
+
+
+
+
 
 %
 % Cartisean Coord to DIR %%%
