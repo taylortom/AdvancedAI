@@ -100,3 +100,6 @@ I have collected some resources on prolog and search in prolog
 - [User Guide](http://www.lpa.co.uk/ftp/4900/win_usr.pdf)
 	
 	
+### Random
+
+- [Nice page I found about markdown](http://daringfireball.net/projects/markdown/syntax)
