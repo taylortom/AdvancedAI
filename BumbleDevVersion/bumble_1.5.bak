@@ -575,8 +575,9 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	find_path(greedy, tree,(Current_X,Current_Y),Path), 
 %	assert(path(Path)),
 %	assert(update_bumble_path_x(Path)),
-	update_bumble_path_x(Path),
-	nl, write(' Path: ' - Path),nl,ttyflush, 
+	remove_first_from_list(Path, FirstRemoved),
+	update_bumble_path_x(FirstRemoved),
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
 
 
@@ -600,13 +601,15 @@ update_bumble_path_x([_|RestOfList]):-
 	update_bumble_path_x(RestOfList).
 
 
+remove_first_from_list([_|Tail], Tail):-
+	true.
 
 %
 % Take Path
 %
 
 % Check if we're already following a path
-bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-	 
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-	 
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
 	Path = [(NewX,NewY)|_],

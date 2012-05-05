@@ -553,9 +553,12 @@ can_remove(o).
 
 %
 %
-% SPENCER TEST CLAUSE
+% Search clauses
 %
 %
+
+
+% if hungry search for tree
 
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
@@ -575,8 +578,34 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	find_path(greedy, tree,(Current_X,Current_Y),Path), 
 %	assert(path(Path)),
 %	assert(update_bumble_path_x(Path)),
-	update_bumble_path_x(Path),
-	nl, write(' Path: ' - Path),nl,ttyflush, 
+	remove_first_from_list(Path, FirstRemoved),
+	update_bumble_path_x(FirstRemoved),
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
+	nl, write('Search Completed').
+
+% if hungry search for tree
+
+bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
+	%fail,
+	heal(Strength,Damage),
+	here(Current_X,Current_Y),
+	findall((X,Y),path(X,Y),NPath),
+	NPath = [], % if the path null
+%	last_seen(tree,Goal_X,Goal_Y),
+%	retractall(mygoal(_)), Bad this is defined automatically in search!
+%	assert(mygoal(tree)),
+	nl, write('Hungry, check to see if i have seen a tree in my map'),nl,ttyflush,
+	%find_path_to(X,Y),
+%	interesting(Obj),
+%	Obj = tree,
+%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
+	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
+	find_path(greedy, cross,(Current_X,Current_Y),Path), 
+%	assert(path(Path)),
+%	assert(update_bumble_path_x(Path)),
+	remove_first_from_list(Path, FirstRemoved),
+	update_bumble_path_x(FirstRemoved),
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
 
 
@@ -600,6 +629,8 @@ update_bumble_path_x([_|RestOfList]):-
 	update_bumble_path_x(RestOfList).
 
 
+remove_first_from_list([_|Tail], Tail):-
+	true.
 
 %
 % Take Path
