@@ -548,6 +548,10 @@ can_remove(bugspray).
 can_remove(o).
 
 
+%Considering if this is the solution to acitve entities block path during search
+
+is_ movable(hornet).
+
 
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -583,7 +587,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
 
-% if hungry search for tree
+% if hungry and no current search generate 
 
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
@@ -613,7 +617,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 
 
 
-
+%Recursive iterator that add items in supplied list to the path
 update_bumble_path_x([_|List]):-
 	List = [],
 	true.
@@ -660,6 +664,15 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 	nl, write('DIR is '), write(DIR),
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
+
+
+
+%NEED SOME CHECK TO SEE IF THE CELL IS OCUPIED. 
+
+%if this is the case then take the first item off the path and use the move
+%toward command then erase teh path. 
+
+
 
 
 %	(((S1=:= 1, S2=:=1); S1=:= 0; s2=:0

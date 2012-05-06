@@ -547,15 +547,19 @@ can_remove(ykey).
 can_remove(bugspray).
 can_remove(o).
 
+is_ movable(hornet).
 
 
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 %
 %
-% SPENCER TEST CLAUSE
+% Search clauses
 %
 %
+
+
+% if hungry search for tree
 
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
@@ -573,6 +577,31 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
 	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
 	find_path(greedy, tree,(Current_X,Current_Y),Path), 
+%	assert(path(Path)),
+%	assert(update_bumble_path_x(Path)),
+	remove_first_from_list(Path, FirstRemoved),
+	update_bumble_path_x(FirstRemoved),
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
+	nl, write('Search Completed').
+
+% if hungry search for tree
+
+bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
+	%fail,
+	heal(Strength,Damage),
+	here(Current_X,Current_Y),
+	findall((X,Y),path(X,Y),NPath),
+	NPath = [], % if the path null
+%	last_seen(tree,Goal_X,Goal_Y),
+%	retractall(mygoal(_)), Bad this is defined automatically in search!
+%	assert(mygoal(tree)),
+	nl, write('Hungry, check to see if i have seen a tree in my map'),nl,ttyflush,
+	%find_path_to(X,Y),
+%	interesting(Obj),
+%	Obj = tree,
+%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
+	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
+	find_path(greedy, cross,(Current_X,Current_Y),Path), 
 %	assert(path(Path)),
 %	assert(update_bumble_path_x(Path)),
 	remove_first_from_list(Path, FirstRemoved),
@@ -632,6 +661,15 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 	nl, write('DIR is '), write(DIR),
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
+
+
+
+%NEED SOME CHECK TO SEE IF THE CELL IS OCUPIED. 
+
+%if this is the case then take the first item off the path and use the move
+%toward command then erase teh path. 
+
+
 
 
 %	(((S1=:= 1, S2=:=1); S1=:= 0; s2=:0
