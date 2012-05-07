@@ -547,7 +547,10 @@ can_remove(ykey).
 can_remove(bugspray).
 can_remove(o).
 
-is_ movable(hornet).
+
+%Considering if this is the solution to acitve entities block path during search
+
+is_movable(hornet).
 
 
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -560,7 +563,6 @@ is_ movable(hornet).
 
 
 % if hungry search for tree
-
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
 	eat(Strength,Damage),
@@ -584,8 +586,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
 
-% if hungry search for tree
-
+% if hurt and no current search generate path to nearest cross
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%fail,
 	heal(Strength,Damage),
@@ -596,7 +597,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %	retractall(mygoal(_)), Bad this is defined automatically in search!
 %	assert(mygoal(tree)),
 	nl, write('Hungry, check to see if i have seen a tree in my map'),nl,ttyflush,
-	%find_path_to(X,Y),
+%	find_path_to(X,Y),
 %	interesting(Obj),
 %	Obj = tree,
 %	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
@@ -613,8 +614,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
 
-
-
+%Recursive iterator that add items in supplied list to the path
 update_bumble_path_x([_|List]):-
 	List = [],
 	true.
@@ -637,7 +637,7 @@ remove_first_from_list([_|Tail], Tail):-
 % Take Path
 %
 
-% Check if we're already following a path
+% Check if we're already following a path if so follow path
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-	 
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
@@ -646,21 +646,58 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 	nl, write('CurrentPosition('), write(CurrentX), write(','), write(CurrentY), write(')'), ttyflush,
 	retract(path(NewX,NewY)),
 	nl, write('NextPosition('), write(NewX), write(','), write(NewY), write(')'), ttyflush,
-%	findDirection(CurrentX,CurrentY,NewX, NewY, DIR),
-%	CalX is NewX - CurrentX,
-%	CalY is NewY - CurrentY,
-%	S1 is sign(CurrentX), % sign returns -1, 0 or 1 
-%	S2 is sign(NewX), % depending on sign of the term 
-%	S3 is sign(CurrentY), 
-%	S4 is sign(NewY), 
-%	nl, write('S1 is '), write(S1), write(' S2 is '), write(S2), write(' S3 is '), write(S3), write(' S4 is '),  write(S4), ttyflush,	
 	heading(CurrentX, NewX, X_Mov),
 	heading(CurrentY, NewY, Y_Mov),
 	nl, write('X_Mov is '), write(X_Mov), write(' Y_Mov is '), write(Y_Mov),ttyflush,
 	coordDirection(X_Mov, Y_Mov, DIR),
 	nl, write('DIR is '), write(DIR),
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
-	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
+	can_visit(Visitable), % is open or visited.
+	member(Visitable,[NW,N,NE,W,E,SW,S,SE],Num). % is open ? 
+
+%MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+
+
+% If following the path has failed try moving into an ajacient cell this will remove the current path
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-	 
+	findall((X,Y),path(X,Y),Path),
+	\+ Path = [],
+	here(CurrentX,CurrentY),
+	nl, write('CurrentPosition('), write(CurrentX), write(','), write(CurrentY), write(')'), ttyflush,
+	retract(path(NewX,NewY)),
+	nl, write('NextPosition('), write(NewX), write(','), write(NewY), write(')'), ttyflush,
+	heading(CurrentX, NewX, X_Mov),
+	heading(CurrentY, NewY, Y_Mov),
+	nl, write('X_Mov is '), write(X_Mov), write(' Y_Mov is '), write(Y_Mov),ttyflush,
+	coordDirection(X_Mov, Y_Mov, GoToward),
+	nl, write('DIR is '), write(GoToward),
+	move_toward_x(GoToward,DIR),
+	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
+	can_visit(Visitable), % is open or visited.
+	member(Visitable,[NW,N,NE,W,E,SW,S,SE],Num),
+	retractall(here(_,_)), % remove old path as bumble will no longer be on it. 
+	nl, write('Bumble could not move to the supplied space bumble has moved to an ajacent space and earsed path').
+%	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
+%	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
+	
+
+%possible feature add new path generation here to ensure same goal? 
+
+% If there's something desirable two squares away, move towards it
+bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
+	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
+	desirable(Obj), % not sure if this is needed?
+	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
+	write(Last),
+	\+ Dir = same, ! ,
+	move_toward_x(GoToward,Dir),
+	nl, write('Something desirable!! move towards it!! '), write(Dir).
+
+
+
+
+%TODO add condition! bubmlle can't move into any space! the path will have to be removed.
 
 
 
@@ -909,6 +946,37 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	move_away_x(s,n).
 	move_away_x(se,nw).
 	
+%Used to move to an ajacent cell for collision avoidance
+
+	% North
+	ajacent(n, nw).
+	ajacent(n, ne).
+	% North West
+	ajacent(nw, n).
+	ajacent(nw, w).
+	% West
+	ajacent(w, nw).
+	ajacent(w, sw).
+	% South West
+	ajacent(sw, w).
+	ajacent(sw, s).
+	% South
+	ajacent(s, sw).
+	ajacent(s, se).
+	% South East
+	ajacent(se, s).
+	ajacent(se, e).
+	% East
+	ajacent(e, se).
+	ajacent(e, ne).
+	% North East
+	ajacent(ne, e).
+	ajacent(ne, n).
+
+
+
+
+
 %%%%%%%%%%%%%% end of table of directions %%%%
 
 
@@ -965,6 +1033,12 @@ threatening(thorn).
 threatening(dragon).
 threatening(troll).
 threatening(witch).
+
+
+% Visitiable
+
+can_visit(o).
+can_visit(v).
 
 % Exploration
 
