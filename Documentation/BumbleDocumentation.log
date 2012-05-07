@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2012.1.10)  7 MAY 2012 14:15
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2012.1.10)  7 MAY 2012 14:31
 entering extended mode
 **BumbleDocumentation.tex
 (C:\Dev\AdvancedAI\Documentation\BumbleDocumentation.tex
@@ -353,27 +353,24 @@ Underfull \hbox (badness 10000) in paragraph at lines 145--146
 
  []
 
-[1] [2] [3] (C:\Dev\AdvancedAI\Documentation\BumbleDocumentation.aux)
+[1] [2] [3] [4] (C:\Dev\AdvancedAI\Documentation\BumbleDocumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  )
 (\end occurred inside a group at level 2)
 
-### semi simple group (level 2) entered at line 205 (\begingroup)
+### semi simple group (level 2) entered at line 228 (\begingroup)
 ### semi simple group (level 1) entered at line 68 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
  6088 strings out of 494049
  85448 string characters out of 3150095
- 192670 words of memory out of 3000000
+ 191670 words of memory out of 3000000
  9293 multiletter control sequences out of 15000+200000
  12236 words of font info for 47 fonts, out of 3000000 for 9000
  715 hyphenation exceptions out of 8191
- 37i,8n,49p,295b,937s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 37i,8n,49p,312b,937s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files/MikTeX/fonts/type1/public/amsfonts/cm/cmbx10.
 pfb><C:/Program Files/MikTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Prog
 ram Files/MikTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/Mik
@@ -381,9 +378,9 @@ TeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MikTeX/fonts/typ
 e1/public/amsfonts/cm/cmr17.pfb><C:/Program Files/MikTeX/fonts/type1/public/ams
 fonts/cm/cmsy10.pfb><C:/Program Files/MikTeX/fonts/type1/public/amsfonts/cm/cmt
 i10.pfb><C:/Program Files/MikTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on BumbleDocumentation.pdf (4 pages, 115163 bytes).
+Output written on BumbleDocumentation.pdf (5 pages, 117793 bytes).
 PDF statistics:
- 47 PDF objects out of 1000 (max. 8388607)
+ 50 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

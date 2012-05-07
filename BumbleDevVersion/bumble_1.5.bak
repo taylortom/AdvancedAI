@@ -346,7 +346,7 @@ find_path(SearchType,Goal,Start,Path) :-
 		Goals), 
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
-	nl,write('Goal X= ' - X_Goal), write('Goal Y' - Y_Goal ),nl,ttyflush,
+	nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
 	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[]), 
 	reverse(ReversedPath,Path), % reverse it - start-to-goal 
 	nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
@@ -679,11 +679,20 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	can_remove(Visitable), % is open or visited.
 	member(Visitable,[NW,N,NE,W,E,SW,S,SE],Num),
-	retractall(here(_,_)), % remove old path as bumble will no longer be on it. 
+	retractall(path(_,_)), % remove old path as bumble will no longer be on it. 
 	nl, write('Bumble could not move to the supplied space bumble has moved to an ajacent space and earsed path').
 %	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
 %	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	
+%on a path but can't follow Remove the current path!
+bumble(_,_) :-
+	findall((X,Y),path(X,Y),Path),
+	\+ Path = [],
+	retractall(path(_,_)), 
+	nl, write('Erasing Path as it can't be followed').
+	
+
+
 
 %possible feature add new path generation here to ensure same goal? 
 
