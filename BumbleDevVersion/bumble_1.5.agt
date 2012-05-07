@@ -346,6 +346,7 @@ find_path(SearchType,Goal,Start,Path) :-
 		Goals), 
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
+	nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
 	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[]), 
 	reverse(ReversedPath,Path), % reverse it - start-to-goal 
 	nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
@@ -598,7 +599,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %	last_seen(tree,Goal_X,Goal_Y),
 %	retractall(mygoal(_)), Bad this is defined automatically in search!
 %	assert(mygoal(tree)),
-	nl, write('Hungry, check to see if i have seen a tree in my map'),nl,ttyflush,
+	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
 %	find_path_to(X,Y),
 %	interesting(Obj),
 %	Obj = tree,
@@ -654,7 +655,7 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 	coordDirection(X_Mov, Y_Mov, DIR),
 	nl, write('DIR is '), write(DIR),
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
-	can_visit(Visitable), % is open or visited.
+	can_remove(Visitable), % is open or visited.
 	member(Visitable,[NW,N,NE,W,E,SW,S,SE],Num). % is open ? 
 
 %MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -676,7 +677,7 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 	nl, write('DIR is '), write(GoToward),
 	move_toward_x(GoToward,DIR),
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
-	can_visit(Visitable), % is open or visited.
+	can_remove(Visitable), % is open or visited.
 	member(Visitable,[NW,N,NE,W,E,SW,S,SE],Num),
 	retractall(here(_,_)), % remove old path as bumble will no longer be on it. 
 	nl, write('Bumble could not move to the supplied space bumble has moved to an ajacent space and earsed path').
