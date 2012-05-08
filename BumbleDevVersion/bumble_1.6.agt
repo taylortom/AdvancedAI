@@ -1095,8 +1095,6 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num2),
 	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num2).
 
-
-
 % When all else fails, sit out a move.
 
 bumble(_,sit).

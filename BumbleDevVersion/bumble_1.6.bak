@@ -1093,7 +1093,7 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	repeat,
 	random_direction(Dir),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num2),
-	member(o,[NW,N,NE,W,E,SW,S,SE],Num2).
+	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num2).
 
 
 
