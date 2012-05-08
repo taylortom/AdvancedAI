@@ -61,7 +61,7 @@ is_bumble_hungry(Strength) :-
 	assert(hungry_status(medium_hungry)).
 
 is_bumble_hungry(Strength) :-
-  	Strength > 3000,
+  	Strength = 3000,
 	nl, write('Not hungry'),
 	retractall(hungry_status(_)),
 	assert(hungry_status(not_hungry)).
@@ -685,11 +685,14 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 %	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	
 %on a path but can't follow Remove the current path!
+
+
+
 bumble(_,_) :-
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
-	retractall(path(_,_)), 
-	nl, write('Erasing Path as it cant be followed').
+	nl, write('Erasing Path as it cant be followed'), ttyflush,
+	retractall(path(_,_)).
 	
 
 
@@ -1095,8 +1098,6 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num2),
 	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num2).
 
-
-
 % When all else fails, sit out a move.
 
 bumble(_,sit).
@@ -1150,6 +1151,7 @@ build_bumble_map([_,_,_,Dir,V1,V2,V3,V4,V5]):-
 	NewY is Y+YY,
 	retractall(here(_,_)),
 	assert(here(NewX,NewY)),
+	write(' -> New here('), write(NewX), write(','), write(NewY), write(')'),
 	update_bumble_map(NewX,NewY,[_,_,_,Dir,V1,V2,V3,V4,V5]).
 
 build_bumble_map([_,_,_,Dir,V1,[WNW,NW,N,NE,ENE],[WW,W,HERE,E,EE],[WSW,SW,S,SE,ESE],V5]):-

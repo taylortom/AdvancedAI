@@ -57,7 +57,7 @@ vmap((0,0),0,[w,w,w,w,w,w,w,w,w,w,door,w,w,w,w,w,w,w,w,w,w,w]).
 vmap((0,0),1,[w,o,o,o,o,o,o,w,o,o,o,o,o,w,o,o,o,o,o,o,o,w]).
 vmap((0,0),2,[w,o,o,o,o,o,o,w,o,o,o,o,o,w,o,o,o,o,o,o,o,w]).
 vmap((0,0),3,[w,o,o,o,o,o,o,w,o,o,tree,o,o,w,o,o,o,o,o,o,o,w]).
-vmap((0,0),4,[w,o,o,o,o,o,o,w,o,o,o,o,hornet,w,o,o,o,o,o,o,o,w]).
+vmap((0,0),4,[w,o,o,o,o,o,o,w,o,o,o,o,o,w,o,o,o,o,o,o,o,w]).
 vmap((0,0),5,[w,o,o,o,o,o,o,w,w,w,w,w,w,w,o,o,o,o,o,o,o,w]).
 vmap((0,0),6,[w,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,w]).
 vmap((0,0),7,[w,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,w]).
