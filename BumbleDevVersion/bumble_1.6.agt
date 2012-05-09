@@ -151,6 +151,35 @@ bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Di
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
 	assert(pushed).
 
+% If there's a cross two squares away, move towards it.
+
+bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
+	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
+	Obj = cross, 
+	heal(Strength,Damage),
+	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
+	move_toward_x(GoToward,Dir).
+
+
+% If there's a tree two squares away, move towards it
+
+bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
+	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
+	Obj = fruit, 
+	eat(Strength,Damage),
+	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
+	move_toward_x(GoToward,Dir).
+
+% If there's a tree two squares away, move towards it
+
+bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
+	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
+	Obj = tree, 
+	eat(Strength,Damage),
+	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
+	move_toward_x(GoToward,Dir).
+
+
 
 
 % Collect any nearby desirable object.
@@ -199,26 +228,6 @@ bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) 
 	nl, write('CATCH THAT BIRD!!!'),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
 	assert(pushed).
-
-% If there's a cross two squares away, move towards it.
-
-bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
-	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
-	interesting(Obj), % not sure if this is needed?
-	Obj = cross, 
-	heal(Strength,Damage),
-	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
-	move_toward_x(GoToward,Dir).
-
-% If there's a tree two squares away, move towards it
-
-bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
-	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
-	interesting(Obj), % not sure if this is needed?
-	Obj = tree, 
-	eat(Strength,Damage),
-	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
-	move_toward_x(GoToward,Dir).
 
 
 
@@ -354,28 +363,17 @@ bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) 
 	member(bugspray,Inventory),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos).
 
-
-%If Obj is hornet and bumble is not holding bugspray move away
-bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(InvDir)) :-
-	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
-	threatening(Obj),
-	Obj = hornet,
-	\+ member(bugspray,Inventory),
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos),
-	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
-
 %If Obj is hornet and bumble is not holding bugspray move away
 bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
 	threatening(Obj),
 	Obj = hornet,
-	\+ member(shield,Inventory),
+	\+ member(bugspray,Inventory),
 	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
 
-
-%If Obj is snail and bumble is not holding bugspray move away
+%If Obj is snail move away
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
 	threatening(Obj),
 	Obj = snail,
 	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
@@ -391,8 +389,6 @@ bumble([_,_,Inventory,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WS
 	member(bugspray,Inventory),
 	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
 	move_toward_x(GoToward,Dir).
-
-
 	
 %
 %
