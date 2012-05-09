@@ -215,7 +215,19 @@ Added an exploration mode which is enabled/disabled based on Bumble's current he
 
 \subsection{Search}
 
-Some random words...
+Search is a major area of game AI as it helps add realism and effeciency to agents movements.
+
+In VWorld if bumble is to survice an negate the world effectivly it is vital for him to have some form of search so he can navigate back to an object he has seen for instance if he is hungry he should negate to a tree or any food he has seen. 
+
+We have experimented with implemeing several types of search, this has been done through carrying out the activities outlined in workshops 4 and 5. 
+
+Our inital investigations explored the use of breadth and depth first search, both of these types of search arn't well suited for our gamewold and games in general, the main resoning for this is their extreamly high worst case perfomance and the fact that they don't produce natural  or effectient search paths. 
+
+It is for this reason we explored the use of heuristic based search, where we looked at greedy and A* search although it should be noted we did consider several other search methods that could give naturalistic approaches such as Theta* however it was demed implementing this would be nontrivial and of little value due to the grid based system present in vworld. 
+
+Overall Implemening search has proven to be challenging and for reason we have been unable to implement A* instead sticking with greedy search.  At the highest level our search is functioning by looking for a parth to an object given a current condition, calling the search predicate will generate a path to the desired object if it is contained in bubmles map of the current world.  There are however issues that can arise in this proccess, the first issue arises when another agent such as a hornet blocks bumble's next step, in this situation he will have to avoid the desired cell and move into one adjacent to it.  This has been handled by defining a list of predicates for adjacent cells one such example of this is given our desired cell north west and it is blocked by a hornet bumble will move to either north or west if he can, afterwhich he will ease his current path.  If bumble is unable to follow the specified path and move to an adjavent cell he will erase his current path. Essentially this is a simple form of collision avoidance this could be extended furthur through the use of ray casting to achive an effect similar to that of open steer. 
+
+Our implementation of greedy search is based off the code provided for the workshop we have had several issues with this code and for this reason we have made some minor adjustments. The main change we have implented is a counter on the amount of times the search can recuse, this is considered a hack however we have deemed this to be nessacery to prevent the heap from overflowing and crashing the application. We had tierlessly attempted to find and debug the underlying cause of this issue. Although this bug does not fully prevent search from functioning, it will however mean that the application is unlikely to run for a great deal of time as bubmle will often become stuck and die of starvation.  Overall this bug is primary barrier to hightend success of the system and in resolving it we feel that we would have had a far more impressive submission. 
 
 \subsection{Fuzzy-Inspired Reasoning}
 	
