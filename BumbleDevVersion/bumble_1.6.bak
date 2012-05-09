@@ -66,33 +66,39 @@ is_bumble_hungry(Strength) :-
 	retractall(hungry_status(_)),
 	assert(hungry_status(not_hungry)).
 
-is_bumble_hungry(Strength). %:-
-	%nl, write('no change in hungry').
+%don't change the hunrgy
+is_bumble_hungry(Strength). 
 
+
+%bumble is critially hurt
 is_bumble_hurt(Damage) :-
 	Damage > 75,
 	nl, write('Critically hurt!'),
 	retractall(hurt_status(_)),
 	assert(hurt_status(critically_hurt)).
 
+%bumble is medium hurt
 is_bumble_hurt(Damage) :-
 	Damage > 40,
 	nl, write('Medium hurt'),
 	retractall(hurt_status(_)),
 	assert(hurt_status(medium_hurt)).
 
+%bumble is not very hurt
 is_bumble_hurt(Damage) :-
 	Damage > 25,
 	nl, write('Small hurt'),
 	retractall(hurt_status(_)),
 	assert(hurt_status(small_hurt)).
 
+%bumble is not hurt
 is_bumble_hurt(Damage) :-
 	Damage = 0,
 	nl, write('Not hurt'),
 	retractall(hurt_status(_)),
 	assert(hurt_status(not_hurt)).
 
+%Leave bumble
 is_bumble_hurt(Damage).
 
 set_exploration:-
@@ -154,23 +160,9 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	desirable(Obj),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
 
-% Keys, bird seed, and bug spray are desirable.
-
-desirable(bkey).
-desirable(blukey).
-desirable(ykey).
-desirable(gkey).
-desirable(pkey).
-desirable(birdseed).
-desirable(bugspray).
-
-% the sword and shield are also desirable
-desirable(sword).
-desirable(shield).
 
 % Try pushing nearby interesting objects if it is a tree
 % trees are interesting & should be pushed only if hungry
-
 
 
 
@@ -186,6 +178,7 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
 	assert(pushed).
 
+% If I've got bugspray and birdseed and bird is close drop bugspray and catch that bird.
 bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	\+ retract(pushed),
 	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
@@ -197,6 +190,7 @@ bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) 
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
 	assert(pushed).
 
+% If there is a bird in two squares away, move towards it. 
 bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	\+ retract(pushed),
 	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
@@ -206,7 +200,7 @@ bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) 
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
 	assert(pushed).
 
-% If there's a cross two squares away, move towards it
+% If there's a cross two squares away, move towards it.
 
 bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
 	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
@@ -227,8 +221,11 @@ bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE]
 	move_toward_x(GoToward,Dir).
 
 
+
+%
 %
 % Take Path
+%
 %
 
 % Check if we're already have a path so follow it!
@@ -281,9 +278,13 @@ bumble(_,_) :-
 	\+ Path = [], % if the current path is not blank
 	nl, write('Erasing Path as it cant be followed'), ttyflush,
 	retractall(path(_,_)). % retract the current path.
-	
+	%TODO: possible feature add new path generation here to ensure same goal? 
 
-
+%
+%
+% Search clauses
+%
+%
 
 % If hungry search for tree
 bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
@@ -313,7 +314,6 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
 	nl, write('Search Completed').
 	%TODO: Possible extension follow path now.
 
-
 % If hurt and no current search generate path to nearest cross
 bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
 	heal(Strength,Damage), % if needs to heal 
@@ -321,7 +321,6 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
 	findall((X,Y),path(X,Y),NPath), % Get the current path 
 	NPath = [], % if the path null
 	nl, write('Hurt, check to see if i have seen a cross in my map'),nl,ttyflush,
-%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
 	find_path(greedy, cross,(Current_X,Current_Y),Path), % Find path to nearest cross
 	remove_first_from_list(Path, FirstRemoved), % remove the first item off the list
 	update_bumble_path_x(FirstRemoved), % Store the newly formed path
@@ -332,18 +331,15 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
 
 % Try to go through any nearby door if you didn't try to go through
 % a door on the last move.
-
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	\+ retract(tried),
 	member(door,[NW,N,NE,W,E,SW,S,SE],Num),
 	assert(tried),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
-% Consume any nearby fruit.
 
 
 % Move away from any threatening object if not in possesssion of a shield
 % (run from dragon unless equipped with sword)
-
 bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
 	Obj = dragon,
@@ -351,43 +347,55 @@ bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) 
 	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir),
 	write('FLEE FROM '), write(Obj).
 
+%If Obj is hornet and bumble is holding bugspray, spray the wasp!
 bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
 	Obj = hornet,
 	member(bugspray,Inventory),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos).
 
-bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
+
+%If Obj is hornet and bumble is not holding bugspray move away
+bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(InvDir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
 	threatening(Obj),
-	\+ Obj = hornet,
-	\+ member(shield,Inventory),
-	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
+	Obj = hornet,
+	\+ member(bugspray,Inventory),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos),
+	move_away_x(Dir,InvDir).
+
+
+
+%If Obj is snail and bumble is not holding bugspray move away
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(InvDir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
+	threatening(Obj),
+	Obj = snail,
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos),
+	move_toward_x(Dir,InvDir).
+
+%	move_away_x(Dir,InvDir).
+
+%extended predicates.
+
+bumble([_,_,Inventory,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
+	member(Obj,[NWNW,NNW,NN,NNE,NENE,SWSW,SSW,SS,SSE,SESE,WNW,ENE,WW,EE,WSW,ESE],Num),
+	threatening(Obj),
+	Obj = hornet,
+	member(bugspray,Inventory),
+	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
+	move_toward_x(GoToward,Dir).
+
+
 	
-
-
-%TODO: possible feature add new path generation here to ensure same goal? 
-
 %
 %
 % Search
 %
 %
-%XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 % NOTE A lot of the code currently contained in this section is GW's
 
-
-
-%insert_nodes(Set1,Set2,Set3) :-
-%	search_type(depth_first),
-%	append(Set1,Set2,Set3).
-
-% For breadth first search, put new nodes at back of queue.
-
-%insert_nodes(Set1,Set2,Set3) :-
-%	search_type(breadth_first),
-%	append(Set2,Set1,Set3).
 
 % For greedy search, need to sort the queue best at front = smallest h(n). 
 % first append to complete the list & then do a sort. sort/3 takes 
@@ -397,8 +405,6 @@ insert_nodes(Set1,Set2,Sorted):-
 	search_type(greedy), % if it is greedy, do sort 
 	append(Set2,Set1,Set3), 
 	sort(Set3,Sorted,[1]). % do something clever! 
-
-
 
 % find_path(SearchType,Goal,Start,Path) searches for a list of
 % coordinates (a Path) that leads from the agent's current 
@@ -413,12 +419,9 @@ insert_nodes(Set1,Set2,Sorted):-
 % can be used by insert_nodes/3 and solution/1.
 
 
-
 % A path satisfies a Goal if the first (eventually, last)
 % position in the path is occupied by Goal.
 %
-% Of course, you would need a different definition of solution
-% for a different domain.
 
 solution([(X,Y)|_]) :-
 	mygoal(Goal),
@@ -465,12 +468,7 @@ generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
 
 
 
-
 %High Level Search Function
-
-
-
-
 find_path(SearchType,Goal,Start,Path) :- 
 	nl,write('Find Path Called= ' - Goal),nl,ttyflush, % print it - final path 
 	retractall(search_type(_)), % house keeping 
@@ -482,47 +480,22 @@ find_path(SearchType,Goal,Start,Path) :-
 		Goals), 
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
-	%nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
 	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[],100), 
 	reverse(ReversedPath,Path). % reverse it - start-to-goal 
-	%nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
 
-
-
-%find_path(SearchType,Goal,Start,Path) :- 
-%	retractall(search_type(_)), % house keeping 
-%	assert(search_type(SearchType)), 
-%	retractall(mygoal(_)), 
-%	assert(mygoal(Goal)), % assert the given goal 
-%	search([[Start]],ReversedPath), % call the top-level search 
-%	reverse(ReversedPath,Path). % reverse it start-to-goal path 
-
-
+% does the first node satisyfy the solution/goal
 search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % first node 
-	%nl, write(' First Node Is : ' - Path),nl,ttyflush, 
-	solution(Path), % goal tile? 
-	nl, write('PATH XXX' - Path),nl.
+	solution(Path). % goal tile? 
 	
 
- 	% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
-	% this is a far from ideal solution however it has increased the success of the program overal
+% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
+% this is a far from ideal solution however it has increased the success of the program overal
 search([[_|_]|_],_,_,_,_,_,Iterations) :-
 	nl, write('Search Dumped to prevent overflow'),nl, 
 	Iterations = 0.
-
-
-%search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
-%	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % next poss 
-%	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
-%	!, 
-%	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % add to CLOSED 
-%	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2),	% better path on CLOSED?
-%	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush,
-%	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush,
-%	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes_2).	 
 	
-
- search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % from the current tile 
+%Main seach method
+search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % from the current tile 
 	% nl, write(' Iterations Remaining: ' - Iterations),nl,ttyflush, 
 	Iterout is Iterations-1, % See note above
 	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % generate next poss tiles 
@@ -530,12 +503,9 @@ search([[_|_]|_],_,_,_,_,_,Iterations) :-
 	!, 
 	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % put the next node (best) on CLOSED 
 	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
-%	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
-%	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
 	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2,Iterout). % recurse with new list 
 
-
-
+%Predicate to check the items in the closed list. 
 check_CLOSED([First|Rest],[D|CLOSED],NextSetOfNodes_2):- % strip off the first (best?) 
 	CLOSED = [] -> NextSetOfNodes_2 = [First|Rest]; % empty? Do nothing 
 	(First=[A,B|Closed], % gets the cost & head of First 
@@ -552,6 +522,8 @@ check_CLOSED([First|Rest],[D|CLOSED],NextSetOfNodes_2):- % strip off the first (
 	append([Best],Rest,NextSetOfNodes_2); % append as a list.. [First] 
 	NextSetOfNodes_2 = [First|Rest]. % else send original list back 
 
+
+%Alternate check close not currently being used.
 check_CLOSED2([First|Rest],[New_addition|CLOSED],NextSetOfNodes_2):- % strip off the first (best?) 
 	CLOSED = [] -> NextSetOfNodes_2 = [First|Rest] ; % empty list? do nothing 
 	(First=[A,B,C,D|Closed], % gets the cost & head of First 
@@ -573,19 +545,6 @@ check_CLOSED2([First|Rest],[New_addition|CLOSED],NextSetOfNodes_2):- % strip off
 
 add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first 
 	append([First],CLOSED,New_CLOSED). % append as a list.. [First] 
-
-
-% call with (e.g.) 
-% find_path(breadth_first,tree,(0,0),_). 
-%:- dynamic [search_type/1, mygoal/1]. 
-
-%search([FirstNode|_],FirstNode) :- % take the first node 
-%	solution(FirstNode). % is it the goal tile? 
-
-%search([FirstNode|RestOfNodes],Solution) :- % from the current tile 
-%	generate_new_nodes(FirstNode,NewNodes), % generate next poss tiles 
-%	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
-%	!, search(NextSetOfNodes,Solution). % recurse with new list 
 
 
 
@@ -625,6 +584,8 @@ generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
 	), 
 	Paths). % this is the list of possible locations 
 
+
+%Calculate the cost 
 get_cost(XX,YY,X,Y,Cost):- 
 	S1 is sign(XX), % sign returns -1, 0 or 1 
 	S2 is sign(X), % depending on sign of the term 
@@ -653,44 +614,17 @@ get_cost(XX,YY,X,Y,Cost):-
 		Cost is max(X_diff,Y_diff). % simply take the max 
 
 
-
+% find the closest goal node
 get_closest([(X,Y,Goal)|Restof], X_Goal,Y_Goal):- 
 	X_Goal = X, 
-	Y_Goal = Y . 
-
-
-% These are the objects that the agent can remove
-% from a location in test7.vw.
-
-can_remove(fruit).
-can_remove(gkey).
-can_remove(ykey).
-can_remove(bugspray).
-can_remove(o).
-can_remove(v).
-
-
-
-%Considering if this is the solution to acitve entities block path during search
-
-is_movable(hornet).
-
-
-%XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-%
-%
-% Search clauses
-%
-%
-
-
+	Y_Goal = Y. 
 
 %Recursive iterator that adds items in supplied list to the path
 update_bumble_path_x([_|List]):-
 	List = [], % if list is empty
 	true.
 
+%If the list doesn't already contain a cell for the following item add it
 update_bumble_path_x([(X,Y)|_]):-
 	\+ path(X,Y), %if path doesn't contain X Y is this really needed..
 	retractall(path(X,Y)), %remove all X Y 
@@ -698,11 +632,13 @@ update_bumble_path_x([(X,Y)|_]):-
 	nl, write('Adding '), write(X),write(Y), write(' to path'),
 	fail.
 
+%Recurse
 update_bumble_path_x([_|RestOfList]):- 
 	update_bumble_path_x(RestOfList). %Recuse through list
 
 
-remove_first_from_list([_|Tail], Tail):- %Pop the first item on the given list retunin the tail
+%Pop the first item on the given list retunin the tail
+remove_first_from_list([_|Tail], Tail):- 
 	true.
 
 
@@ -716,94 +652,21 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	move_toward_x(GoToward,Dir),
 	nl, write('Something desirable!! move towards it!! '), write(Dir).
 
-
-
-%if this is the case then take the first item off the path and use the move
-%toward command then erase teh path. 
-
-
-
-
-%	(((S1=:= 1, S2=:=1); S1=:= 0; s2=:0
-%(((S1=:= -1, S2=:= -1); % if XX & X are both negative 
-%		(S1=:= 1, S2=:= 1); % or are both positive 
-%		S1=:= 0 ; % or one of them is zero 
-%		S2=:= 0) -> 
-%	X_diff is abs(CurrentX-NewX); % then just subtract (& lllllllllllabs) 
-%	((S1=:= 1, S2=:= -1); % if XX = pos & X = neg 
-%		(S1=:= -1, S2=:= 1)) -> % or XX = neg & X = pos 
-%		(XX_abs is abs(CurrentX), % then get the absolute value 
-%		X_abs is abs(NewX), % same for X 
-%		X_diff is abs(XX_abs + X_abs)); true), % add them in this case 
-%	(((S3=:= -1, S4=:= -1); % same thing for YY & Y 
-%		(S3=:= 1, S4=:= 1); 
-%		S3=:= 0; 
-%		S4=:= 0) -> 
-%		Y_diff is abs(CurrentY-NewY); 
-%	((S3=:= 1, S4=:= -1); 
-%		(S3=:= -1, S4=:= 1)) -> 
-%		(YY_abs is abs(CurrentY), 
-%		Y_abs is abs(NewY), 
-%		Y_diff is abs(YY_abs + Y_abs)); true), 
-
+%Calculate the 
+%If current is less than next direction is posive on axis
 heading(Current, Next, Val) :-
 	Current < Next, 
 	Val is 1.
 
+%If current is greater than next direction is negative on axis
 heading(Current, Next, Val) :-
 	Current > Next, 
 	Val is -1.
 
+%If equal there is no movement
 heading(Current, Next, Val) :-
 	Current = Next, 
 	Val is 0.
-
-
-%ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-
-% Check if we've already seen a cross
-
-%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-	 
-%	heal(Strength,Damage),
-%	last_seen(cross,X,Y),
-%	nl, write('Hurt, already seen a cross'),
-%	fail,
-%	find_path_to(X,Y).
-
-% Check if we've already seen a tree
-
-%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-	
-%	eat(Strength,Damage),
-%	last_seen(tree,X,Y),
-%	nl, write('Hungry, already seen a tree'),
-%	fail,
-%	find_path_to(X,Y).
-	
-% Check if we've already seen some fruit
-
-%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-%	eat(Strength,Damage),
-%	last_seen(fruit,X,Y),
-%	nl, write('Hungry, already seen some fruit'),
-%	fail,
-%	find_path_to(X,Y).
-	
-	
-% Searches the map and generates a path
-
-%Methods not currently being used.
-%find_path_to(X,Y):-
-%	findall((X,Y),path(X,Y),Path), % check that there isn't already a path
-%	Path = [],
-%	nl, write('Need to find a path to: ('), write(X), write(','), write(Y), write(')'),
-%	here(Current_X, Current_Y),
-%	write(' from: ('), write(Current_X), write(','), write(Current_Y), write(')').
-
-%find_path_to(_,_):-
-%	findall((X,Y),path(X,Y),Path),
-%	nl, write('Already following a path: '), write(Path).
-
 
 
 % If there's something interesting two squares away, move towards it
@@ -830,204 +693,21 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	nl, write('Something desirable!! move towards it!! '), write(Dir).
 
 
-
-
-
-
-
-/* 
- * Table of directions 
- */
-	% top left corner
-	move_toward_x(nwnw,nw).
-	move_toward_x(nwnw,n).
-	move_toward_x(nwnw,w).
-	
-	% top right corner
-	move_toward_x(nene,ne). 
-	move_toward_x(nene,n).
-	move_toward_x(nene,e).
-	
-	% bottom left corner
-	move_toward_x(swsw,sw). 
-	move_toward_x(swsw,s).
-	move_toward_x(swsw,w).
-	
-	% botton right corner
-	move_toward_x(sese,se). 
-	move_toward_x(sese,s).
-	move_toward_x(sese,e).
-	
-	% a - top left of centre
-	move_toward_x(nnw,w).
-	move_toward_x(nnw,nw).
-	
-	% b - top centre
-	move_toward_x(nn,n).
-	move_toward_x(nn,nw).
-	move_toward_x(nn,ne).
-	
-	% c - top right of centre
-	move_toward_x(nne,n).
-	move_toward_x(nne,ne).
-	
-	% d - bottom left of centre
-	move_toward_x(ssw,s).
-	move_toward_x(ssw,sw).
-	
-	% e - bottom centre
-	move_toward_x(ss,s).
-	move_toward_x(ss,sw).
-	move_toward_x(ss,se).
-	
-	% f - bottom right of centre
-	move_toward_x(sse,s).
-	move_toward_x(sse,se).
-	
-	% g - left up from centre
-	move_toward_x(wnw,w).
-	move_toward_x(wnw,nw).
-	
-	% h - left centre
-	move_toward_x(ww,w).
-	move_toward_x(ww,nw).
-	move_toward_x(ww,sw).
-	
-	% i - left below centre
-	move_toward_x(wsw,w).
-	move_toward_x(wsw,sw).
-
-	% j - right up from centre
-	move_toward_x(ene,e).
-	move_toward_x(ene,ne).
-	
-	% k - right centre
-	move_toward_x(ee,e).
-	move_toward_x(ee,ne).
-	move_toward_x(ene,se).
-	
-	% l - right below centre
-	move_toward_x(ese,e).
-	move_toward_x(ese,se).
-
-
-	% Used to run away from danger
-	move_away_x(nw,se).
-	move_away_x(n,s).
-	move_away_x(ne,sw).
-	move_away_x(w,e).
-	move_away_x(e,w).
-	move_away_x(sw,ne).
-	move_away_x(s,n).
-	move_away_x(se,nw).
-	
-%Used to move to an ajacent cell for collision avoidance
-
-	% North
-	ajacent(n, nw).
-	ajacent(n, ne).
-	% North West
-	ajacent(nw, n).
-	ajacent(nw, w).
-	% West
-	ajacent(w, nw).
-	ajacent(w, sw).
-	% South West
-	ajacent(sw, w).
-	ajacent(sw, s).
-	% South
-	ajacent(s, sw).
-	ajacent(s, se).
-	% South East
-	ajacent(se, s).
-	ajacent(se, e).
-	% East
-	ajacent(e, se).
-	ajacent(e, ne).
-	% North East
-	ajacent(ne, e).
-	ajacent(ne, n).
-
-
-
-
-
-%%%%%%%%%%%%%% end of table of directions %%%%
-
-
-%%Find direction from two close nodes
-%coordDirection(CurrentX - CurrentY, NextX - NextY, DIR).
-
-
-
-
-
-%
-% Cartisean Coord to DIR %%%
-%     CoordDirection(X,Y,DIR)
-%
-
-%NB: I have commented out spaces two steps away as bubmble can only move one set at a time
-
-%	coordDirection(-2,-2,nwnw).
-%	coordDirection(-1,-2,nnw).
-%	coordDirection(0,-2,nn).
-%	coordDirection(1,-2,nne).
-%	coordDirection(2,-2,nene).
-%	coordDirection(-1,-2,wnw).
-	coordDirection(-1,-1,nw).
-	coordDirection(0,-1,n).
-	coordDirection(1,-1,ne).
-%	coordDirection(2,-1,ene).
-%	coordDirection(-2,0,ww).
-	coordDirection(-1,0,w).
-	coordDirection(1,0,e).
-%	coordDirection(2,0,ee).
-%	coordDirection(-2,1,wsw).
-	coordDirection(-1,1,sw).
-	coordDirection(0,1,s).	
-	coordDirection(1,1,se).
-%	coordDirection(2,1,ese).
-%	coordDirection(-2,2,swsw).
-%	coordDirection(-1,2,ssw).
-%	coordDirection(0,2,ss).
-%	coordDirection(1,2,sse).
-%	coordDirection(2,2,sese).
-
-% Trees, red croses, and birds are interesting.
-
-interesting(tree).
-interesting(cross).
-interesting(bird).
-
-% Hornets, snails, and thorns are threatening.
-
-threatening(hornet).
-threatening(snail).
-threatening(thorn).
-threatening(dragon).
-threatening(troll).
-threatening(witch).
-
-
-% Visitiable
-
-can_visit(o).
-can_visit(v).
-
 % Exploration
-
+%check all ajacent cells have been visited before adding 
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	exploration,
+	exploration, %is bubmle exploring
 	member(o,[E,NE,N,NW,W,SW,S,SE],Pos),
 	check_visited(Pos),
 	nl, write('Exploring...open space at: '), write(Pos), write(' '),
 	write([E,NE,N,NW,W,SW,S,SE]),
 	member(Dir,[e,ne,n,nw,w,sw,s,se],Pos).
 
+%TODO: add exploration to outer circle 
+
+
 % About 87% of the time, move in the direction you went
 % last if it is clear.
-
 bumble([_,_,_,LastLocation,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	nl, write('Not exploring'),
 	random_direction(X),
@@ -1038,7 +718,6 @@ bumble([_,_,_,LastLocation,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir
 	member(o,[NW,N,NE,W,E,SW,S,SE],Num).
 
 % Move at random to empty space.
-
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(o,[NW,N,NE,W,E,SW,S,SE]),
 	repeat,
@@ -1056,7 +735,6 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num2).
 
 % When all else fails, sit out a move.
-
 bumble(_,sit).
 
 
@@ -1072,7 +750,6 @@ check_visited(Pos):-
 	\+ visited(TempX,TempY),
 	nl, write('Not visited: ('), write(TempX), write(','), write(TempY), write(')').
 
-
 %
 %
 %
@@ -1081,22 +758,27 @@ check_visited(Pos):-
 %
 %
 
+
+%Build bumble map first run.
 build_bumble_map(Perceptions):-
 	\+ here(_,_), !, % first time, no map
 	assert(here(0,0)), % always starts at (0,0)
 	assert(visited(0,0)), % must be open space
 	update_bumble_map(0,0,Perceptions).
 
+
+%add the current location to the visited map. 
 build_bumble_map(_):-
 	here(X,Y),
 	nl, write('moved from here('), write(X), write(','), write(Y), write(')'),
-	%mymap(X,Y,o),
 	assert(visited(X,Y)),
 	fail.
 
+% no move - cut search - nothing
 build_bumble_map([_,_,_,Dir,_,_,_,_,_]):-
-	Dir = same, ! . % no move - cut search - nothing
+	Dir = same, ! . 
 
+%Update bumbles map. 
 build_bumble_map([_,_,_,Dir,V1,V2,V3,V4,V5]):-
 	\+ tried, !, % bumble did not go through a door last time
 	here(X,Y),
@@ -1109,6 +791,8 @@ build_bumble_map([_,_,_,Dir,V1,V2,V3,V4,V5]):-
 	write(' -> New here('), write(NewX), write(','), write(NewY), write(')'),
 	update_bumble_map(NewX,NewY,[_,_,_,Dir,V1,V2,V3,V4,V5]).
 
+
+%If the last visited cell was a door, the apply padding to the current map.
 build_bumble_map([_,_,_,Dir,V1,[WNW,NW,N,NE,ENE],[WW,W,HERE,E,EE],[WSW,SW,S,SE,ESE],V5]):-
 	here(X,Y),
 	nl, write('Went through a door from('), write(X), write(','), write(Y), write(')'),
@@ -1126,7 +810,7 @@ build_bumble_map([_,_,_,Dir,V1,[WNW,NW,N,NE,ENE],[WW,W,HERE,E,EE],[WSW,SW,S,SE,E
 
 
 
-	
+%Top level update map method. 
 update_bumble_map(BX,BY,[_,_,_,_,
 		[NWNW,NNW,NN,NNE,NENE],		% V1
 		[WNW,NW,N,NE,ENE],		% V2
@@ -1149,14 +833,14 @@ update_bumble_map(BX,BY,[_,_,_,_,
 	List),
 	update_bumble_map_x(List).
 
+% if the tail of the list is empty return true. 
 update_bumble_map_x([_|List]):-
 	List = [],
 	true.
 
+%Add items to map that arn't on map and that can't see, hornet, snail and bird. 
 update_bumble_map_x([(X,Y,Obj)|_]):-
 	\+ Obj = cant_see,
-	\+ Obj = o,
-	\+ Obj = fruit,
 	\+ Obj = hornet,
 	\+ Obj = snail,
 	\+ Obj = bird,
@@ -1166,80 +850,274 @@ update_bumble_map_x([(X,Y,Obj)|_]):-
 	nl, write('Adding '), write(Obj), write(' to ('), write(X), write(','), write(Y), write(')'),
 	fail.
 
-update_bumble_map_x([(X,Y,Obj)|_]):-
-	Obj = o,
-	\+ mymap(X,Y,Obj),
-	\+ visited(X,Y),
-	retractall(mymap(X,Y,_)),
-	assert(mymap(X,Y,Obj)),
-	nl, write('Adding '), write(Obj), write(' to ('), write(X), write(','), write(Y), write(')'),
-	fail.
-
-update_bumble_map_x([(X,Y,Obj)|_]):-
-	Obj = tree,
-	\+ last_seen(Obj,X,Y),
-	%nl, write('Adding '), write(Obj), write(' to last_seen'),
-	retractall(last_seen(Obj,_,_)),
-	assert(last_seen(Obj,X,Y)),
-	fail.
-
-update_bumble_map_x([(X,Y,Obj)|_]):-
-	Obj = fruit,
-	\+ last_seen(Obj,X,Y),
-	%nl, write('Adding '), write(Obj), write(' to last_seen'),
-	retractall(last_seen(Obj,_,_)),
-	assert(last_seen(Obj,X,Y)),
-	fail.
-
-%if Obj is a cross and not stored in last seen add to last seen map.
-update_bumble_map_x([(X,Y,Obj)|_]):-
-	Obj = cross,
-	\+ last_seen(Obj,X,Y),
-	%nl, write('Adding '), write(Obj), write(' to last_seen'),
-	retractall(last_seen(Obj,_,_)),
-	assert(last_seen(Obj,X,Y)),
-	fail.
-
 %Recuse through the rest of the list
 update_bumble_map_x([_|RestOfList]):-  
 	update_bumble_map_x(RestOfList).
-
-
-
-
-
-
-
 
 %
 % Fuzzy-style reasoning 
 %
 
 eat(_,_):-
-	hungry_status(starving).
-	%nl, write('Bumble REALLY needs to eat!').
+	hungry_status(starving),
+	nl, write('Bumble REALLY needs to eat!').
 
 eat(_,_):-
 	\+ hurt_status(critically_hurt),
-	hungry_status(very_hungry).
-	%nl, write('Bumble needs to eat!').
+	hungry_status(very_hungry),
+	nl, write('Bumble needs to eat!').
 
 eat(_,_):-
 	hungry_status(medium_hungry),
 	\+ hurt_status(medium_hurt),
-	\+ hurt_status(small_hurt).
-	%nl, write('Bumble needs to eat a bit!').
+	\+ hurt_status(small_hurt),
+	nl, write('Bumble needs to eat a bit!').
 
 heal(_,_):-
-	hurt_status(very_hurt).
-	%nl, write('Bumble REALLY needs to heal!').
+	hurt_status(very_hurt),
+	nl, write('Bumble REALLY needs to heal!').
 
 heal(_,_):-
 	hurt_status(medium_hurt),
-	\+ hungry_status(starving).
-	%nl, write('Bumble needs to heal!').
+	\+ hungry_status(starving),
+	nl, write('Bumble needs to heal!').
 
 heal(_,_):-
 	hurt_status(small_hurt),
-	\+ hungry_status(starving).
-	%nl, write('Bumble needs to heal a bit!').
+	\+ hungry_status(starving),
+	nl, write('Bumble needs to heal a bit!').
+
+
+/* 
+ * Table of directions 
+ */
+
+% top left corner
+move_toward_x(nwnw,nw).
+move_toward_x(nwnw,n).
+move_toward_x(nwnw,w).
+	
+% top right corner
+move_toward_x(nene,ne). 
+move_toward_x(nene,n).
+move_toward_x(nene,e).
+	
+% bottom left corner
+move_toward_x(swsw,sw). 	
+move_toward_x(swsw,s).
+move_toward_x(swsw,w).
+	
+% botton right corner
+move_toward_x(sese,se). 
+move_toward_x(sese,s).
+move_toward_x(sese,e).
+
+% a - top left of centre
+move_toward_x(nnw,w).
+move_toward_x(nnw,nw).
+	
+% b - top centre
+move_toward_x(nn,n).
+move_toward_x(nn,nw).
+move_toward_x(nn,ne).
+
+% c - top right of centre
+move_toward_x(nne,n).
+move_toward_x(nne,ne).
+
+% d - bottom left of centre
+move_toward_x(ssw,s).
+move_toward_x(ssw,sw).
+	
+% e - bottom centre
+move_toward_x(ss,s).
+move_toward_x(ss,sw).
+move_toward_x(ss,se).
+	
+% f - bottom right of centre
+move_toward_x(sse,s).
+move_toward_x(sse,se).
+	
+% g - left up from centre
+move_toward_x(wnw,w).
+move_toward_x(wnw,nw).
+	
+% h - left centre
+move_toward_x(ww,w).
+move_toward_x(ww,nw).
+move_toward_x(ww,sw).
+	
+% i - left below centre
+move_toward_x(wsw,w).
+move_toward_x(wsw,sw).
+
+% j - right up from centre
+move_toward_x(ene,e).
+move_toward_x(ene,ne).
+	
+% k - right centre
+move_toward_x(ee,e).
+move_toward_x(ee,ne).
+move_toward_x(ene,se).
+	
+% l - right below centre
+move_toward_x(ese,e).
+move_toward_x(ese,se).
+
+
+% Used to run away from danger
+move_away_x(nw,se).
+move_away_x(n,s).
+move_away_x(ne,sw).
+move_away_x(w,e).
+move_away_x(e,w).
+move_away_x(sw,ne).
+move_away_x(s,n).
+move_away_x(se,nw).
+	
+%Used to move to an ajacent cell for collision avoidance
+% North
+ajacent(n, nw).
+ajacent(n, ne).
+% North West
+ajacent(nw, n).
+ajacent(nw, w).
+% West
+ajacent(w, nw).
+ajacent(w, sw).
+% South West
+ajacent(sw, w).
+ajacent(sw, s).
+% South
+ajacent(s, sw).
+ajacent(s, se).
+% South East
+ajacent(se, s).
+ajacent(se, e).
+% East
+ajacent(e, se).
+ajacent(e, ne).
+% North East
+ajacent(ne, e).
+ajacent(ne, n).
+
+%%%%%%%%%%%%%% end of table of directions %%%%
+
+
+%
+% Cartisean Coord to DIR %%%
+%     CoordDirection(X,Y,DIR)
+% Example: coordDirection(CurrentX - CurrentY, NextX - NextY, DIR).
+%
+
+%NB: I have removed spaces two steps away as bubmble can only move one set at a time
+
+coordDirection(-1,-1,nw).
+coordDirection(0,-1,n).
+coordDirection(1,-1,ne).
+coordDirection(-1,0,w).
+coordDirection(1,0,e).
+coordDirection(-1,1,sw).
+coordDirection(0,1,s).	
+coordDirection(1,1,se).
+
+% Trees, red croses, and birds are interesting.
+
+interesting(tree).
+interesting(cross).
+interesting(bird).
+
+% Hornets, snails, and thorns are threatening.
+
+threatening(hornet).
+threatening(snail).
+threatening(thorn).
+threatening(dragon).
+threatening(troll).
+threatening(witch).
+
+% Visitiable
+
+can_visit(o).
+can_visit(v).
+
+% These are the objects that the agent can remove
+% from a location in test7.vw.
+can_remove(fruit).
+can_remove(gkey).
+can_remove(ykey).
+can_remove(bugspray).
+can_remove(o).
+can_remove(v).
+
+
+% Desireable Items
+desirable(bkey).
+desirable(blukey).
+desirable(ykey).
+desirable(gkey).
+desirable(pkey).
+desirable(birdseed).
+desirable(bugspray).
+desirable(sword).
+desirable(shield).
+
+
+
+%Congrats for reading this far, heres a little treat
+%?????????????????+?++???++++++++++++++++++++++++++++++++++++++++++++++?++++?????
+%???????????????++???++???+++++?++?+++?+++??+?+++++?++++++++++++++??+?++??????+??
+%?????????????????++++++?+??++?II$O$O$Z7O$ZI??+????+?I7777$7$$$$$$77??+++++???+??
+%????????????????????????++??Z$OOZ$88OZ7O8D888Z7I$$$$$$$$$I7$$$$$$$$??++++???????
+%??????????????????++????++7$ZZZO$ZZZOOZZDDD8NOD8II?77$$$$$$$$$$?$$Z????+++???+??
+%?????????????????+???++?77O8OOIZ7$77I$7ZO8DDDDDD88$I?I$$?$$$$$$$$$$?????????+???
+%????????????????????+??ZOO?77?IIIII77$7$7ZO8NNDD8D8Z$$I7$I$II$$7$$Z??????+?????+
+%????????????????????IOO877?I??+++++++??I7ZZ$$ODNDNZ7$Z$$$7I$I77I$$Z????++++??+??
+%??????????????????+?O8$??????+++++++++++???II7$7OOOZ$Z$$$$$$77I7$IZ???++++??????
+%????????????????+++7$I+??????++=====++++++???II7$$$OII$O$$$$$$7I?$$?????+??+?+?+
+%?????????????????+?7ZII?I?+?++++=+==+===+++????I7$$7?=O$$$$$$$$$?$7????+?+??????
+%??????????????????Z$7II??+++++++++++++++++++++??77$II+78Z$$$$$7$$IZ????+++??????
+%?????????????????7IIIII??+++++?+++++++??+++++???I77??IIZ8$$$$$$$$$Z???++++?+????
+%?????????????????$=+II??+?++++++++++++==++++++??II7I++7IDZ$$$$$$$$Z???++????????
+%????????????????+$??I??+++++========~~~==+++??II7I77I?+IOOZZZZZ$ZZ8??????+?????+
+%???????????????+?$??II?++++=+=~~~~:~~~==??7??=??II77I??Z$8D88DD8888????????????+
+%?????????????????$?I7I?++??+?+?=~=~~~=+?7I+++?+??III77$DOND8888888D??????+??????
+%?????????????????7Z?7I+??=I77I??++==++++=I++?ZZZO7$I7$77ZID8888888D???++?+?+++++
+%??????????????????I77II?++~+=~=++?==+?$7I7Z$O$ZII??II$$Z7+88888888D????+??++++??
+%??????????????????Z77I7II?OOZIII8$???7?+?I?++I?II?=IIIZ7I=D88888888?????+++++++?
+%?????????????????+$?$II7Z7$II?I?I++++?$+++++?==+??+?I7Z7=+DD888888D???+?++++++++
+%???????????????????I7???I+=+?++???++???+?++++=++=++?I77++8DDO888888?+?+?++++++++
+%?????????+?????????II+?+??+++????++=+??+====+=++++?I7$IIIDD8OO8OOO8????+++++++++
+%?????????????????+?I+??+?=+===~??++=+?I?+==~~~==+??I$$II7D8OOOOZOOO??++++??+++++
+%??????????????????+?III?++===+??+=~~~+I??+??+==++?II$Z7?78O$$$$$Z$Z???++++++++++
+%?????????????????+??I7I?++++?+??I?+++I?I+++==?+++??I$Z??D8O$$$$$ZZZ??+++++++++++
+%?????????????????+??III??++?+++?+????+++++++==+=+??I7$OOOZ$77III7Z7+?+++++++++++
+%???????????+????+??+I??+?+++++??++======????+=+=+??I7$$$7?+++++++++??+++++++++++
+%???????????????????+?I?+?++++7$$I??++?7?=+7??+==+?+I$Z7?+++++++++++??+++++++++++
+%???????????????????+?I?+++=+??$I7==~+=7III?+++=+++?7$$7?++++++++++++++++++++++++
+%???????+?????+????+++?7??+==+???+++=~===++++++++???Z$OZ$777777777????+++++++++++
+%?????????????+?????+???I+?+++???+==+====++++++????$$$$7????I?III777?++++++++++++
+%??????????????+???++?+?7I??+++??++++?++?++++++?II$7$8O$777777777777?++++++++++++
+%??????????????+??+?+???I7???+??????+===+?+++?III$77$OZ7I??I777$7777??+++++++++++
+%?????????????????+++?+??7I7II??+?++==~==?+++I$777I7$+I7777$7777777I??+++++++?+++
+%????????????????+????++++=II$7I?+++++=+++II$777III77==?+??????????????++++++?+++
+%?????????????????++????+=I=I?7$7I7????II$$77IIII??I7+~~=IIIIIIIIIII???++++++?+==
+%??????????????????++++7++:==I?II$7IIIII7777II?I???I$?~:~+OO????III7???+++++?++==
+%??????????+???????ZDOO==~?=~=I+III?+===?I??++?????II=~=:=?$88888??????+++?++++=+
+%????????????+?$O88D8O~+=+~~:~+????I++~==++??++???II+=+~:::=?8DDDDD8D8$?+I?++++==
+%??????+???888DDDD8DD==~==~+=::????+???++++++??++??I=:~,~=~~=+D8DDDDDDDDDDD8D87++
+%???????O8DDDDDDDD88~?=~=~~==,~+?++=+??I??++++++?+?I==~?:$8NI=?DDDDDDDDDDDDDDNDD8
+%???I88DDDD888DD8D8~~:=~:==~=:+,:,++=======+++++??+=,:.,NDD8DD7~NDDDDDDDDDDDDDDDD
+%$8DDDDDDD88DD888D~===:==?8~,~~~:~~~==++++++===+?++=?.ND8DDD8D8?:DDDDDDDDDDDDDDDD
+%D8DDDDD88DD888DD=~=~==,O8OZ:+~:++?=::=+=======+?+:.$88888DDDD88+8DDDDDDDDD8DDDDD
+%DDDD8DD88D8DDD8$~==D8D88888Z::,,:,=,~==++++===++=?~~88888DDD8D8O88DDDD8DDDD8DDD8
+%DDDDDDDDDDDDD8~:88ODD8888D88O::::~,=.:~?=+===++=~::O8888888DDD8D~8DDD888DDDD8DDD
+%8DDDDDD8888DD88D8888DDD8D8888O:~:~,::,,:+++==?=:~:=O8888DDD8DDDD8D88D888DDD88DDD
+%88D8DDDDDD8DDD88D888D888D888888:=,~:=~:~~==+?++=:,O8888D88DDDNDDDDD88DDD8D8D88DD
+%D888D88DDD888D8DD8888D88DD8888DO=+:+:=:.::+~,,+,:8888888888888D8DDDDDDDD88DD888D
+%8DDD8D88D8D88DD8888888D8D888D88DOO:,:,,,::~+~.,,=8888888D888DDD88888D8888888DDDD
+%88888DD8888DD8888D888D88D8DDO8888OO,:,,+:=:,.:,,D8888D88DD88D888DDD888888888D888
+%88DDD8888888D8DD88888888O8888DD88Z8O7.:=~,:=,::OODDO88D8888D8O88888D8D88888D8888
+%8888888DDD8D8D8888D88D8888888888O8OO8O:+:.:.,,8DD8O8D888D88D88D88888888888D88888
+%8888888888D8888888D88888888888O8O88888Z8=.:.:O888O88D888D88888O888O8888888888888
+%88D8888DD88D8D88D8OD8888888888888O8O8888O8IOOO888D88D888888OD88D888888O888888888
