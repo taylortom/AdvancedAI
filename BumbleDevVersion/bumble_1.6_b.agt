@@ -451,10 +451,10 @@ search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % first node
 
  	% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
 	% this is a far from ideal solution however it has increased the success of the program overal
-search([[_|_]|_],Out,_,_,_,_,Iterations) :-
-	nl, write('Search Dumped to prevent overflow'),nl, 
-	Iterations = 0,
-	Out is [(0,0)].
+%search([[_|_]|_],Out,_,_,_,_,Iterations) :-
+%	nl, write('Search Dumped to prevent overflow'),nl, 
+%	Iterations = 0,
+%	Out is [].
 
 
 %search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
