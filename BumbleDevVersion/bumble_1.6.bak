@@ -116,15 +116,6 @@ set_exploration.
 % Here are the instructions Bumble follows.
 
 
-% Try to go through any nearby door if you didn't try to go through
-% a door on the last move.
-
-bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	\+ retract(tried),
-	member(door,[NW,N,NE,W,E,SW,S,SE],Num),
-	assert(tried),
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
-% Consume any nearby fruit.
 
 
 % push crosses if hurt
@@ -339,6 +330,15 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
 	%TODO: Possible extension follow path now.
 
 
+% Try to go through any nearby door if you didn't try to go through
+% a door on the last move.
+
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(tried),
+	member(door,[NW,N,NE,W,E,SW,S,SE],Num),
+	assert(tried),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+% Consume any nearby fruit.
 
 
 % Move away from any threatening object if not in possesssion of a shield
@@ -483,7 +483,7 @@ find_path(SearchType,Goal,Start,Path) :-
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
 	%nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
-	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[],150), 
+	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[],100), 
 	reverse(ReversedPath,Path). % reverse it - start-to-goal 
 	%nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
 
