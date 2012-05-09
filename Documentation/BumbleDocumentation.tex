@@ -253,22 +253,47 @@ We decided to use the Git version control system for this. Using Git, we made us
 
 We used Github to host our Git repository. As a side product of this, we were also able to make use of Github's 'Issues' feature, which allows all team members to add 
 	
-\section{Testing and Results}
+\section{Testing and Analysis}
 
 We have utilised the set of test maps supplied with bumble to evaluate the effectiveness of our solution. In this experimentation we work with the assumption that if bumble survives more than 5000 moves he will live infinitely.
 	
-	???3 or 5 tests ? 
+	\subsection{Bird One}
 
-\begin{table}[h!]
-	\centering
-	\begin{tabular}{| l | c | c | c | r |}
-	\hline
-		Map & Test 1 & Test 2 & Test 3 & Mean \\ \hline
-		Test 1 &  X & Y & Z & X+Y+Z/3 \\ \hline
-	\end{tabular}
-	\caption{This table shows some data}
-	\label{tab:myfirsttable}
-\end{table}
+		\begin{figure}[h!]
+		  \caption{Screenshot of bumble compleating bird one.}
+		  \centering
+			\includegraphics[width=0.5\textwidth]{bumbleBird1.png}
+		\end{figure}
+
+
+	The map bird one requires bumlbe to collect the birdseed and capture the bird whilst avoiding other agents on the map.  Generally bumble will survive this map 40 \% of the time, this success depends on several key features we have implemented in bumble. 
+	
+	Firstly is the issue of dealing with the wasps contained on the map, as these will attack bumble, these are also set to guard the bird seed. Bumble will generally avoid these hornets very well however quite often they will manage to damage him because of this it is essential bumble know the position of the heart and the tree so he can return to to these and recover, with out the mapping and search components this would not have been possible and bumble would have dropped off his mortal coil. 
+	
+	The snail presents a real issue to Bumble as it will often destroy his ability to search effectively because as it will follow him incessantly and get in his way, the snail can block bumble up against a wall causing him to starve to death, this is also an issue prevalent when the wasp and snail block Bumble in.
+
+	
+	\subsection{Test 1}
+		Bumble will generally perfom well in this wolrd however this should be a given as there are a large amount of resources and a only one hornet to attack him, our perfomance with the current system is not as optimal as it has previously been where bumble could go infiniatly. To resolve the current issue with the system we feel that we need to improve the get closest method as this isn't actually giving and optimal goal. 
+		
+	\subsection{Test 2}
+		The perfomance in this test is simalr to the the last test,  as bumble will now only survive a finite amount of time where he would previously 
+		
+		
+		we belive that this isse has arise because the wasp is capable of holding bumble oagainst the wall and killing him
+	
+	
+	
+%\begin{table}[h!]
+%	\centering
+%	\begin{tabular}{| l | c | c | c | r |}
+%	\hline
+%		Map & Test 1 & Test 2 & Test 3 & Mean \\ \hline
+%		Test 1 &  X & Y & Z & X+Y+Z/3 \\ \hline
+%	\end{tabular}
+%	\caption{This table shows some data}
+%	\label{tab:myfirsttable}
+%\end{table}
 
 \section{Analysis}
 
