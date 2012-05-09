@@ -124,30 +124,6 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(door,[NW,N,NE,W,E,SW,S,SE],Num),
 	assert(tried),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
-
-% Move away from any threatening object if not in possesssion of a shield
-% (run from dragon unless equipped with sword)
-
-bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
-	Obj = dragon,
-	\+ member(sword,Inventory),
-	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir),
-	write('FLEE FROM '), write(Obj).
-
-bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
-	Obj = hornet,
-	member(bugspray,Inventory),
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos).
-
-bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
-	threatening(Obj),
-	\+ Obj = hornet,
-	\+ member(shield,Inventory),
-	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
-	
 % Consume any nearby fruit.
 
 bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
@@ -312,6 +288,32 @@ bumble(_,_) :-
 	nl, write('Erasing Path as it cant be followed'), ttyflush,
 	retractall(path(_,_)). % retract the current path.
 	
+
+% Move away from any threatening object if not in possesssion of a shield
+% (run from dragon unless equipped with sword)
+
+bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
+	Obj = dragon,
+	\+ member(sword,Inventory),
+	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir),
+	write('FLEE FROM '), write(Obj).
+
+bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
+	Obj = hornet,
+	member(bugspray,Inventory),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos).
+
+bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	member(Obj,[NW,N,NE,W,E,SW,S,SE]),
+	threatening(Obj),
+	\+ Obj = hornet,
+	\+ member(shield,Inventory),
+	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
+	
+
+
 %TODO: possible feature add new path generation here to ensure same goal? 
 
 %
@@ -446,15 +448,15 @@ find_path(SearchType,Goal,Start,Path) :-
 
 search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % first node 
 	%nl, write(' First Node Is : ' - Path),nl,ttyflush, 
-	solution(Path). % goal tile? 
+	solution(Path), % goal tile? 
+	nl, write('PATH XXX' - Path),nl.
 	
 
  	% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
 	% this is a far from ideal solution however it has increased the success of the program overal
-search([[_|_]|_],Out,_,_,_,_,Iterations) :-
+search([[_|_]|_],_,_,_,_,_,Iterations) :-
 	nl, write('Search Dumped to prevent overflow'),nl, 
-	Iterations = 0,
-	Out is [].
+	Iterations = 0.
 
 
 %search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
