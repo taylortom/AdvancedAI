@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  9 MAY 2012 17:50
+This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  9 MAY 2012 18:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -352,7 +352,7 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 145.
  [2]
-Overfull \hbox (36.91222pt too wide) in paragraph at lines 204--205
+Overfull \hbox (36.91222pt too wide) in paragraph at lines 205--206
 []\OT1/cmr/m/n/10 Added an ex-plo-ration mode which is en-abled/dis-abled based
  on Bum-ble's cur-rent health/strength.
  []

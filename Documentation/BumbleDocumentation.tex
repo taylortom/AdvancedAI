@@ -173,10 +173,16 @@ As it was, Bumble's behaviour was still very naive. Bumble only considered objec
 
 \section{Modifications}
 
-One of the key elements in our strategy was the smaller, more incremental changes and bug-fixes to the original system.
+One of the key elements in our strategy was the smaller, more incremental changes and bug-fixes to the original system. While these may seem fairly insignificant, we feel that they actually contributed greatly to Bumble's appearance of intelligence, and the overall 'believability' of VWorld as a game.
+
+One of the first changes we made was to add extra predicates to allow Bumble to spot interesting and desirable objects from two squares away, and move towards them (as he does with the tree/cross). This obviously meant that Bumble was more likely to pick up these useful objects whilst exploring. We also ordered these predicates in a logical was to reflect the priority that Bumble would use. The priority for removable objects (including crosses) below:
+
+\begin{itemize}
+	\item 
+\end{itemize}
 
 
-There were a lot of small modifications which were made to improve the basic version of Bumble.
+ health and strength power-ups are considered to be the highest priority. However, we consider any 'nearby' objects to be of a higher priority to those Bumble 
 
 The hornets follow Bumble upon spying him.
 
@@ -188,7 +194,9 @@ Fixed a bug whereby Bumble could get stuck alternating between two interesting o
 Hornets no longer cause injury if Bumble's in possession of the bugspray. Also, the bugspray now actually works.
 
 Added a conversion from cartesian coordinates to directions
+
 Bumble now spies desirable/interesting objects from 2 squares away
+
 Fixed a bug whereby Bumble could get stuck in a corridor 1 sq wide (see castle2.vw). 
 If there was an interesting/ desirable object at the end of the corridor, Bumble would try to go west, but would simple stay in the same sqaure. There's now a check to see if Bumble already attempted the same move, if so, he moves randomly.
 
