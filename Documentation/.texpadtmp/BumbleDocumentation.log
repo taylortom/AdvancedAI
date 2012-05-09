@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  4 MAY 2012 15:48
+This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  9 MAY 2012 17:50
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -305,7 +305,7 @@ File: lstlang1.sty 2004/09/05 1.3 listings language file
 (/usr/local/texlive/2011/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2007/02/22 1.4 (Carsten Heinz)
 )
-(/Users/tom/Desktop/Documentation/.texpadtmp/BumbleDocumentation.aux)
+(/Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumentation.aux)
 \openout1 = `BumbleDocumentation.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 76.
@@ -332,20 +332,6 @@ Package caption Info: End \AtBeginDocument code.
 LaTeX Font Warning: Font shape `OT1/cmr/bx/sc' undefined
 (Font)              using `OT1/cmr/bx/n' instead on input line 92.
 
-
-./BumbleDocumentation.tex:95: LaTeX Error: \begin{flushleft} on input line 90 e
-nded by \end{flushright}.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.95 ^^I\end{flushright}
-                        
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
 LaTeX Font Info:    Try loading font information for U+msa on input line 96.
 (/usr/local/texlive/2011/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
@@ -354,55 +340,41 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 96.
 
 (/usr/local/texlive/2011/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
-)
+) [1
 
-./BumbleDocumentation.tex:103: LaTeX Error: \begin{flushright} on input line 98
- ended by \end{flushleft}.
+] [1]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 145.
 
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.103 ^^I\end{flushleft}
-                        
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
 
-[1
-
-]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 133.
-
- (/usr/local/texlive/2011/texmf-dist/tex/latex/base/omscmr.fd
+(/usr/local/texlive/2011/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 133.
-
-Underfull \hbox (badness 10000) in paragraph at lines 145--146
-
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 145.
+ [2]
+Overfull \hbox (36.91222pt too wide) in paragraph at lines 204--205
+[]\OT1/cmr/m/n/10 Added an ex-plo-ration mode which is en-abled/dis-abled based
+ on Bum-ble's cur-rent health/strength.
  []
 
-[1] [2] [3]
-(/Users/tom/Desktop/Documentation/.texpadtmp/BumbleDocumentation.aux)
+[3] [4] [5]
+(/Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  )
-(\end occurred inside a group at level 2)
+(\end occurred inside a group at level 1)
 
-### semi simple group (level 2) entered at line 185 (\begingroup)
 ### semi simple group (level 1) entered at line 68 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 5683 strings out of 494150
- 81382 string characters out of 3152950
+ 5701 strings out of 494150
+ 81586 string characters out of 3152950
  186051 words of memory out of 3000000
- 8866 multiletter control sequences out of 15000+200000
- 10537 words of font info for 39 fonts, out of 3000000 for 9000
+ 8879 multiletter control sequences out of 15000+200000
+ 12236 words of font info for 47 fonts, out of 3000000 for 9000
  1018 hyphenation exceptions out of 8191
- 37i,6n,49p,295b,675s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 37i,8n,49p,760b,675s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on /Users/tom/Desktop/Documentation/.texpadtmp/BumbleDocumentati
-on.pdf (4 pages).
+Output written on /Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumenta
+tion.pdf (6 pages).
