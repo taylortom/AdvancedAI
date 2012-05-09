@@ -6,7 +6,7 @@
 % Last modified: 12/06/2005
 %
 
-:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry_status/1,hurt_status/1,mymap/3,here/2,last_seen/3,path/2,exploration/0,search_type/1,mygoal/1].
+:- dynamic [agent/2,tried/0,last/1,pushed/0,hungry_status/1,hurt_status/1,mymap/3,visited/2,here/2,last_seen/3,path/2,exploration/0,search_type/1,mygoal/1].
 
 % agent(+Perceptions, -Action) receives set of Perceptions from the
 % V-World simulator and returns an Action. Perceptions is a list of 
@@ -208,6 +208,27 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	interesting(Obj),
 	\+ Obj = tree, 
 	\+ Obj = cross,
+	\+ Obj = bird,
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	Obj = bird,
+	member(birdseed,Inventory),
+	member(bugspray,Inventory),
+	vdrop(bugspray),
+	nl, write('DROPPED THE SPRAY...CATCH THAT BIRD!!!'),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	Obj = bird,
+	member(birdseed,Inventory),
+	nl, write('CATCH THAT BIRD!!!'),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
 	assert(pushed).
 
@@ -727,32 +748,31 @@ heading(Current, Next, Val) :-
 
 % Check if we've already seen a cross
 
-bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	 
-	heal(Strength,Damage),
-	last_seen(cross,X,Y),
-	nl, write('Hurt, already seen a cross'),
-	fail,
-	find_path_to(X,Y).
+%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-	 
+%	heal(Strength,Damage),
+%	last_seen(cross,X,Y),
+%	nl, write('Hurt, already seen a cross'),
+%	fail,
+%	find_path_to(X,Y).
 
 % Check if we've already seen a tree
 
-bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	
-	eat(Strength,Damage),
-	last_seen(tree,X,Y),
-	nl, write('Hungry, already seen a tree'),
-	fail,
-	find_path_to(X,Y).
+%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-	
+%	eat(Strength,Damage),
+%	last_seen(tree,X,Y),
+%	nl, write('Hungry, already seen a tree'),
+%	fail,
+%	find_path_to(X,Y).
 	
 % Check if we've already seen some fruit
 
-bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	eat(Strength,Damage),
-	last_seen(fruit,X,Y),
-	nl, write('Hungry, already seen some fruit'),
-	fail,
-	find_path_to(X,Y).
+%bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
+%	eat(Strength,Damage),
+%	last_seen(fruit,X,Y),
+%	nl, write('Hungry, already seen some fruit'),
+%	fail,
+%	find_path_to(X,Y).
+	
 	
 % Searches the map and generates a path
 
@@ -778,6 +798,7 @@ bumble([_,_,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,
 	\+ Obj = tree,
 	\+ Obj = cross,
 	\+ Obj = fruit,
+	\+ Obj = bird,
 	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
 	move_toward_x(GoToward,Dir),
 	nl, write('Something interesting!! move towards it!!').
@@ -982,14 +1003,11 @@ can_visit(v).
 
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	exploration,
-	%member(o,[NE,NW,SE,SW,N,E,S,W],Pos),
-	member(o,[NW,N,NE,W,E,SW,S,SE],Pos),
+	member(o,[E,NE,N,NW,W,SW,S,SE],Pos),
 	check_visited(Pos),
-	nl, write('Exploring...open space at: '), write(Pos),
-	%write([NE,NW,SE,SW,N,E,S,W]),
-	write([NW,N,NE,W,E,SW,S,SE]),
-	%member(Dir,[ne,nw,se,sw,n,e,s,w],Pos).
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos).
+	nl, write('Exploring...open space at: '), write(Pos), write(' '),
+	write([E,NE,N,NW,W,SW,S,SE]),
+	member(Dir,[e,ne,n,nw,w,sw,s,se],Pos).
 
 % About 87% of the time, move in the direction you went
 % last if it is clear.
@@ -1031,12 +1049,11 @@ bumble(_,sit).
 %
 
 check_visited(Pos):-
-	%member((XX,YY),[(1,-1),(-1,-1),(1,1),(-1,1),(0,-1),(1,0),(0,1),(-1,0)],Pos),
-	member((XX,YY),[(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)],Pos),
+	member((XX,YY),[(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1),(0,1),(1,1)],Pos),
 	here(X,Y),
 	TempX is X+XX,
 	TempY is Y+YY,
-	\+ mymap(TempX,TempY,v),
+	\+ visited(TempX,TempY),
 	nl, write('Not visited: ('), write(TempX), write(','), write(TempY), write(')').
 
 
@@ -1051,15 +1068,14 @@ check_visited(Pos):-
 build_bumble_map(Perceptions):-
 	\+ here(_,_), !, % first time, no map
 	assert(here(0,0)), % always starts at (0,0)
-	assert(mymap(0,0,v)), % must be open space
+	assert(visited(0,0)), % must be open space
 	update_bumble_map(0,0,Perceptions).
 
 build_bumble_map(_):-
 	here(X,Y),
 	nl, write('moved from here('), write(X), write(','), write(Y), write(')'),
-	mymap(X,Y,o),
-	retract(mymap(X,Y,o)),
-	assert(mymap(X,Y,v)),
+	%mymap(X,Y,o),
+	assert(visited(X,Y)),
 	fail.
 
 build_bumble_map([_,_,_,Dir,_,_,_,_,_]):-
@@ -1137,7 +1153,7 @@ update_bumble_map_x([(X,Y,Obj)|_]):-
 update_bumble_map_x([(X,Y,Obj)|_]):-
 	Obj = o,
 	\+ mymap(X,Y,Obj),
-	\+ mymap(X,Y,v),
+	\+ visited(X,Y),
 	retractall(mymap(X,Y,_)),
 	assert(mymap(X,Y,Obj)),
 	nl, write('Adding '), write(Obj), write(' to ('), write(X), write(','), write(Y), write(')'),

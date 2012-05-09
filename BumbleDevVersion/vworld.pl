@@ -37,7 +37,7 @@ vstartup :-
 	  msgbox(`Error in Program`,Message,16'00000031,_)
 	 )
 	),
-	halt(0).
+	halt(0). 
 
 % vmain calls the initialization routines, starts the VWORLD 
 % window handler, and closes the window and menus when the dialog ends.   
@@ -1792,30 +1792,24 @@ vreact(tree,_,_).
 % they will move at random.  
 
 vanimate(hornet). 
+
+veff(hornet,-1,25).
  
 vreact(hornet,X,Y) :-
  	vfind_in_inventory(bugspray),
  	vdraw(X,Y,o).  
 
-veff(hornet,-1,25):-
-	\+ vfind_in_inventory(bugspray).
-
 vact(hornet,X,Y) :-
-	\+ vfind_in_inventory(bugspray),
  	vlocate(X,Y,a,_,_),
  	!,
  	vinjure(3),
  	vstatus_report.
 
 vact(hornet,X,Y) :-
-	vfollow(hornet,a,X,Y).
-
-vact(hornet,X,Y) :-
 	vpatrol(hornet,X,Y).
 
 vact(hornet,X,Y) :-
  	vmove_at_random(hornet,X,Y).
-
 
 % SNAILS
 %
@@ -1865,6 +1859,12 @@ vcollectable(bird).
 
 vcollectable(birdseed).
 
+vavoid(bird,a).
+
+vwants(bird,birdseed).
+
+veff(bird,-1,0).
+
 vact(bird,X,Y) :-
 	one((
 		 vwants(bird,Object)
@@ -1874,9 +1874,14 @@ vact(bird,X,Y) :-
 	\+ vfind_in_inventory(Object),
 	vescape(bird,X,Y).
 
-vavoid(bird,a).
+vact(bird,_,_) :-
+	one((
+		 vwants(bird,Object)
+		;
+		 Object = birdseed
+	   )),
+	vfind_in_inventory(Object).
 
-veff(bird,-1,0).
 
 vact(bird,X,Y) :-
 	vmove_at_random(bird,X,Y).
