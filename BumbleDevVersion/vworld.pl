@@ -1792,12 +1792,12 @@ vreact(tree,_,_).
 % they will move at random.  
 
 vanimate(hornet). 
-
-veff(hornet,-1,25).
  
 vreact(hornet,X,Y) :-
  	vfind_in_inventory(bugspray),
  	vdraw(X,Y,o).  
+
+veff(hornet,-1,25).
 
 vact(hornet,X,Y) :-
  	vlocate(X,Y,a,_,_),
