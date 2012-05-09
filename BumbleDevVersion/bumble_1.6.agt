@@ -367,8 +367,12 @@ search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % first node
 	solution(Path). % goal tile? 
 	
 
+ 	% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
+	% this is a far from ideal solution however it has increased the success of the program overal
 search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :-
-	Iterations = 0.
+	nl, write('Search Dumped to prevent overflow'),nl, 
+	Iterations = 0. 
+
 
 %search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
 %	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % next poss 
@@ -383,9 +387,7 @@ search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :-
 
  search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % from the current tile 
 	% nl, write(' Iterations Remaining: ' - Iterations),nl,ttyflush, 
- 	% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
-	% this is a far from ideal solution however it has increased the success of the program overal
-	Iterout is Iterations-1, 
+	Iterout is Iterations-1, % See note above
 	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % generate next poss tiles 
 	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
 	!, 
@@ -546,7 +548,8 @@ is_movable(hornet).
 %
 
 
-% if hungry search for tree
+
+% If hungry search for tree
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	eat(Strength,Damage),
 	here(Current_X,Current_Y),
@@ -560,8 +563,22 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	nl, write('Search Completed').
 	%TODO: Possible extension follow path now.
 
+% If hungry and no tree search for fruit
+bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
+	eat(Strength,Damage),
+	here(Current_X,Current_Y),
+	findall((X,Y),path(X,Y),NPath),
+	NPath = [], % if the path null
+	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
+	find_path(greedy, fruit,(Current_X,Current_Y),Path), % Find path to nearest tree
+	remove_first_from_list(Path, FirstRemoved), % Pop the first item as it's the current position
+	update_bumble_path_x(FirstRemoved), %Store the new path
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush,
+	nl, write('Search Completed').
+	%TODO: Possible extension follow path now.
 
-% if hurt and no current search generate path to nearest cross
+
+% If hurt and no current search generate path to nearest cross
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	heal(Strength,Damage), % if needs to heal 
 	here(Current_X,Current_Y), % get current position
@@ -577,10 +594,8 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	%TODO: Possible extension follow path now.
 
 
-%YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
-
-%Recursive iterator that add items in supplied list to the path
+%Recursive iterator that adds items in supplied list to the path
 update_bumble_path_x([_|List]):-
 	List = [], % if list is empty
 	true.
@@ -738,66 +753,20 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 	nl, write('Hungry, already seen some fruit'),
 	fail,
 	find_path_to(X,Y).
-
-	
-	
 	
 % Searches the map and generates a path
 
-find_path_to(X,Y):-
-	findall((X,Y),path(X,Y),Path), % check that there isn't already a path
-	Path = [],
-	nl, write('Need to find a path to: ('), write(X), write(','), write(Y), write(')'),
-	here(Current_X, Current_Y),
-	write(' from: ('), write(Current_X), write(','), write(Current_Y), write(')').
+%Methods not currently being used.
+%find_path_to(X,Y):-
+%	findall((X,Y),path(X,Y),Path), % check that there isn't already a path
+%	Path = [],
+%	nl, write('Need to find a path to: ('), write(X), write(','), write(Y), write(')'),
+%	here(Current_X, Current_Y),
+%	write(' from: ('), write(Current_X), write(','), write(Current_Y), write(')').
 
-find_path_to(_,_):-
-	findall((X,Y),path(X,Y),Path),
-	nl, write('Already following a path: '), write(Path).
-
-
-
-
-printxyo(List) :-
-	List = [],	
-	nl, write('list is empty'),
-	true.
-
-
-printxyo([(X,Y,OBJ)|_]) :-
-	nl, write(X),
-	nl, write(Y),
-	nl, write(OBJ),
-	true. 
-
-
-printxyo([_|List]):-
-	List = [],
-	nl, write('Tail Of list is empty'),
-	true.
-
-
-
-%first() :- % take the first node 
-
-
-%	Path(
-
-%update_bumble_map_x([(X,Y,Obj)|_]):-
-%	update_bumble_map_x(List).
-	%write(last_seen),
-	%nl.	
-
-%update_bumble_map_x([_|List]):-
-%	List = [],
-%	true.
- 
-%MoveTowardsNext([(X,Y,Obj)|_]):-
-
-
-
-
-
+%find_path_to(_,_):-
+%	findall((X,Y),path(X,Y),Path),
+%	nl, write('Already following a path: '), write(Path).
 
 
 
@@ -832,19 +801,23 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 /* 
  * Table of directions 
  */
-	move_toward_x(nwnw,nw). % top left corner
+	% top left corner
+	move_toward_x(nwnw,nw).
 	move_toward_x(nwnw,n).
 	move_toward_x(nwnw,w).
-	%
-	move_toward_x(nene,ne). % top right corner
+	
+	% top right corner
+	move_toward_x(nene,ne). 
 	move_toward_x(nene,n).
 	move_toward_x(nene,e).
-	%
-	move_toward_x(swsw,sw). % bottom left corner
+	
+	% bottom left corner
+	move_toward_x(swsw,sw). 
 	move_toward_x(swsw,s).
 	move_toward_x(swsw,w).
 	
-	%move_toward_x(sese,se). % botton right corner
+	% botton right corner
+	%move_toward_x(sese,se). 
 	move_toward_x(sese,s).
 	move_toward_x(sese,e).
 	
@@ -900,6 +873,8 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	move_toward_x(ese,e).
 	move_toward_x(ese,se).
 
+
+	% Used to run away from danger
 	move_away_x(nw,se).
 	move_away_x(n,s).
 	move_away_x(ne,sw).
@@ -1184,6 +1159,7 @@ update_bumble_map_x([(X,Y,Obj)|_]):-
 	assert(last_seen(Obj,X,Y)),
 	fail.
 
+%if Obj is a cross and not stored in last seen add to last seen map.
 update_bumble_map_x([(X,Y,Obj)|_]):-
 	Obj = cross,
 	\+ last_seen(Obj,X,Y),
@@ -1192,7 +1168,8 @@ update_bumble_map_x([(X,Y,Obj)|_]):-
 	assert(last_seen(Obj,X,Y)),
 	fail.
 
-update_bumble_map_x([_|RestOfList]):- 
+%Recuse through the rest of the list
+update_bumble_map_x([_|RestOfList]):-  
 	update_bumble_map_x(RestOfList).
 
 
