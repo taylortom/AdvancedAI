@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  9 MAY 2012 18:05
+This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  9 MAY 2012 18:50
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -351,14 +351,13 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 145.
- [2]
-Overfull \hbox (36.91222pt too wide) in paragraph at lines 205--206
+ [2] [3]
+Overfull \hbox (36.91222pt too wide) in paragraph at lines 218--219
 []\OT1/cmr/m/n/10 Added an ex-plo-ration mode which is en-abled/dis-abled based
  on Bum-ble's cur-rent health/strength.
  []
 
-[3] [4] [5]
-(/Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumentation.aux)
+[4] [5] (/Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -368,11 +367,11 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 ### semi simple group (level 1) entered at line 68 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 5701 strings out of 494150
- 81586 string characters out of 3152950
+ 5720 strings out of 494150
+ 81773 string characters out of 3152950
  186051 words of memory out of 3000000
- 8879 multiletter control sequences out of 15000+200000
- 12236 words of font info for 47 fonts, out of 3000000 for 9000
+ 8891 multiletter control sequences out of 15000+200000
+ 15336 words of font info for 59 fonts, out of 3000000 for 9000
  1018 hyphenation exceptions out of 8191
  37i,8n,49p,760b,675s stack positions out of 5000i,500n,10000p,200000b,50000s
 
