@@ -177,6 +177,7 @@ One of the key elements in our strategy was the smaller, more incremental change
 
 One of the first changes we made was to add extra predicates to allow Bumble to spot interesting and desirable objects from two squares away, and move towards them (as he does with the tree/cross). This obviously meant that Bumble was more likely to pick up these useful objects whilst exploring. We also ordered these predicates in a logical was to reflect the priority that Bumble would use. These priorities for removable objects (including crosses and trees) is given below:
 
+\singlespace
 \begin{enumerate}
 	\item Eat fruit
 	\item Push tree
@@ -187,6 +188,7 @@ One of the first changes we made was to add extra predicates to allow Bumble to 
 	\item Move towards cross
 	\item Move towards tree
 \end{enumerate}
+\onehalfspace
 
 
 
@@ -194,7 +196,6 @@ The hornets follow Bumble upon spying him.
 
 Bumble no longer flees if in possession of the shield/sword
 
-When Bumble becomes hurt, he checks the map for the appropriate resources to fix him.
 Fixed a bug whereby Bumble could get stuck alternating between two interesting objects (e.g. tree/cross)
 
 Hornets no longer cause injury if Bumble's in possession of the bugspray. Also, the bugspray now actually works.
@@ -206,34 +207,57 @@ A map of the entire level is built. When Bumble goes through a door, an extra sq
 
 As removable items are taken by Bumble, they are also removed from the map.
 
-Implemented basic fuzzy reasoning for the strength/health. Bumble now has more levels: 
-Not hungry, small hungry, medium hungry, starving etc. These levels are used when determining whether Bumble should consume fruit/use crosses. If Bumble sees fruit, but is very hurt, it will pass by and continue looking for a cross.
-
-Added an exploration mode which is enabled/disabled based on Bumble's current health/strength. If not hungry/hurt, Bumble will explore the map for areas not visited using the preference: e, nw, se, sw, n, e, s, w. As Bumble explores, the squares he visits are marked off, removing them from the exploration mode. Bumble stops exploring if he can't see any nearby unvisited squares.
-
 \section{New Features}
+
+In addition to the bug-fixes and modifications that we made to the system, we also implemented a few new features. These are outlined in this section.
 
 \subsection{Search}
 
-Search is a major area of game AI as it helps add realism and effeciency to agents movements.
+Search is a major area of game AI as it helps add realism and efficiency to agents movements. Implementing some form of search algorithm was key to the success of Bumble in the game; he needed some way to be able to seek out previously-visited resources as and when he needed them. For instance, if he is hungry he should be able to negotiate to a tree or any food he has seen. 
 
-In VWorld if bumble is to survice an negate the world effectivly it is vital for him to have some form of search so he can navigate back to an object he has seen for instance if he is hungry he should negate to a tree or any food he has seen. 
+We have experimented with a few types of search, using workshops 4 and 5 as a starting point. In our initial investigations, we explored the use of breadth and depth first search. After further investigation, we decided that neither of these types of search were suited for VWorld (or indeed games in general), primarily due to the fact that they have a very poor worst case performance. Additionally, the paths they produce are often far from optimal, and rarely 'natural'. Agents which use `natural looking' paths are key to the believability of the game. 
 
-We have experimented with implemeing several types of search, this has been done through carrying out the activities outlined in workshops 4 and 5. 
+For this reason, we explored the use of heuristic-based search in our game. We primarily looked at greedy and A* search although it should be noted that we did consider several other search methods that could give even more naturalistic approaches such as Theta* however we decided that implementing this would be non-trivial (exacerbated by our inexperience with using Prolog), and of little value due to the grid based system present in VWorld. Overall, implementing search proved to be the most challenging aspect of development, and was the main reason that we have been unable to implement A*, instead sticking with the slightly simpler greedy search.  
 
-Our inital investigations explored the use of breadth and depth first search, both of these types of search arn't well suited for our gamewold and games in general, the main resoning for this is their extreamly high worst case perfomance and the fact that they don't produce natural  or effectient search paths. 
+At the highest level, our search functions by looking for a path to an object given a current condition. Calling the search predicate will generate a path to the desired object provided that it is contained in Bumble's current map of the world.  There are however issues that can arise in this process. One issue arises when another agent such as a hornet blocks Bumble's next step. In this situation, he will have to avoid the desired cell and move into one adjacent to it. This is handled by defining a list of predicates for adjacent cells. 
 
-It is for this reason we explored the use of heuristic based search, where we looked at greedy and A* search although it should be noted we did consider several other search methods that could give naturalistic approaches such as Theta* however it was demed implementing this would be nontrivial and of little value due to the grid based system present in vworld. 
+For example, if the desired cell is north-west of Bumble's current position, and it is blocked by a hornet, Bumble will move to either north or west if he can. If Bumble is unable to even move to an adjacent cell, he simply moves randomly. In any case, Bumble's path will now be incorrect, so it is erased. This is essentially a simple form of collision avoidance, and could be extended further through the use of ray-casting, similar to that of the Open Steer C++ library.
 
-Overall Implemening search has proven to be challenging and for reason we have been unable to implement A* instead sticking with greedy search.  At the highest level our search is functioning by looking for a parth to an object given a current condition, calling the search predicate will generate a path to the desired object if it is contained in bubmles map of the current world.  There are however issues that can arise in this proccess, the first issue arises when another agent such as a hornet blocks bumble's next step, in this situation he will have to avoid the desired cell and move into one adjacent to it.  This has been handled by defining a list of predicates for adjacent cells one such example of this is given our desired cell north west and it is blocked by a hornet bumble will move to either north or west if he can, afterwhich he will ease his current path.  If bumble is unable to follow the specified path and move to an adjavent cell he will erase his current path. Essentially this is a simple form of collision avoidance this could be extended furthur through the use of ray casting to achive an effect similar to that of open steer. 
-
-Our implementation of greedy search is based off the code provided for the workshop we have had several issues with this code and for this reason we have made some minor adjustments. The main change we have implented is a counter on the amount of times the search can recuse, this is considered a hack however we have deemed this to be nessacery to prevent the heap from overflowing and crashing the application. We had tierlessly attempted to find and debug the underlying cause of this issue. Although this bug does not fully prevent search from functioning, it will however mean that the application is unlikely to run for a great deal of time as bubmle will often become stuck and die of starvation.  Overall this bug is primary barrier to hightend success of the system and in resolving it we feel that we would have had a far more impressive submission. 
+Our implementation of greedy search is based on the code provided for the workshop. There were several issues with this code, and for this reason we have made some minor adjustments. The main change we have implemented is to a counter to count the number of times the search recurses. This is a deliberate `hack' which we deemed to be necessary to prevent heap overflow errors, and game crashes. We invested hours trying to find and debug the underlying cause of this issue, but without any success, hence our less-than-perfect solution. One improvement we did make which slightly alleviated this bug was to make sure that Bumble checked if he was following a path before anything else. We found that in some levels, Bumble would be too cautious around the NPCs, trying to flee even if he was following a search path.  Although this bug does not prevent search from functioning, it does mean that the application is unlikely to run for a great deal of time, as Bumble will often become `stuck' between walls and other NPCs, causing death die-by-starvation. Overall this bug is the primary barrier to the success of our system and in resolving it we feel that we would have had a far more impressive AI system. 
 
 \subsection{Fuzzy-Inspired Reasoning}
+
+We also wanted to apply some fuzzy reasoning to the Bumble's states (i.e. hungry and hurt). The idea behind being that Bumble could prioritise which power-up was needed based on whether he was more hungry, or more hurt. We initially implemented the traditional `fuzzy' style of reasoning, but found that the probabilistic element didn't really result in the behaviour that we wanted, as it caused very unpredictable and unrealistic behaviour. For this reason, we instead decided to create a fuzzy `inspired' method of reasoning. We did this by adding extra levels of hurt and hunger (starving, very hungry, medium hungry, not hungry etc.). Using these extra levels meant that we were then able to have more control over when Bumble would go for crosses and fruit. This was a particularly important issue after we implemented the search, as Bumble's state could change mid-path. After adding these new states, we created new predicates $eat(\_,\_)$ and $heal(\_,\_)$. Below is an example of this:
+
+\begin{verbatim}
+eat(_,_):-
+    hungry_status(starving).
+
+eat(_,_):-
+    \+ hurt_status(critically_hurt),
+    hungry_status(very_hungry).
+
+eat(_,_):-
+    hungry_status(medium_hungry),
+    \+ hurt_status(medium_hurt),
+    \+ hurt_status(small_hurt).
+\end{verbatim}
 	
-Didn't bother with the probability component, as it caused unpredictable and unrealistic behaviour.
+This predicate is used to determine whether Bumble should try to eat or not. As can be seen from the code, Bumble will always eat if he is starving, but will prioritise his health if he is $critically_hurt$. In the final predicate, we can see that Bumble will only eat if he is $medium_hungry$ when his health is high (i.e. not $small_hurt$ or $medum_hurt$).
+
+\subsection{Exploration}
+
+The final additional feature that we added was a way for Bumble to explore the map in a more effective way than simply randomly walking around. To do this, we created an $exploration/0$ flag which stored whether or not Bumble should `explore' the world. This flag is based on whether or not Bumble can see any unvisited squares in his immediate vicinity (i.e. within a one square `radius'). For this to work, we also needed to add a list of visited squares stored as (X,Y) coordinates ($visited/2$). As Bumble explores the world, he adds the squares he visits to the list. Exploration mode is also enabled and disabled based on Bumble's current strength and damage values; this discourages Bumble from exploring unknown terrain if he's injured or hungry. Including this exploration mode means that items are found as quickly as possible. It also means that Bumble spends less time moving around randomly at the beginning of the game; a lot of time (and strength) was often wasted due to Bumble running around in illogical circles in areas that he had already visited.
+
+The method by which Bumble explores the environment is very naive. It simply looks for unvisited squares around Bumble in the following order: east, north-east, north, north-west, west, south-west, south, south-east. Exploration could be greatly improved if some algorithm was used which allows Bumble to explore the map in a more logical and methodical way such as the wall-follower algorithm.
 
 \section{Team Development}
+	
+As we were working in a pair, it was very important to ensure that we put some measure in place to make sure that we could collaborate efficiently without causing any corruption by editing the same file at the same time. This was particularly important for this project, as we were only really working from a single source file. Using source control also means that we were also creating incremental backups of the project, which was very useful to compensate for data loss.
+
+We decided to use the Git version control system for this. Using Git, we made use of the branching feature, which allowed us both to create a separate `branch' of the code, which we could then work on two implement a new feature. After the feature had been implemented and tested, we could then merge that branch back into the main branch. This development process worked well.
+
+We used Github to host our Git repository. As a side product of this, we were also able to make use of Github's 'Issues' feature, which allows all team members to add 
 	
 \section{Testing and Results}
 
@@ -260,36 +284,40 @@ What we found out from the results
 
 \section{Further Work}
 
-\subsection{Machine Learning}
-We have both completed final year projects in this area, and this is something of great interest, we feel that this is very interesting area of AI...
-
-		
-		
-\paragraph{Q-learning}
-		
-\paragraph{Reinforcement Learning}
-		
-\paragraph{Genetic Algorithms}
+Although we were fairly pleased with the final outcome of the final game, there are a number of areas which could be improved upon and extended to provide an even more intelligent Bumble.
 	
 \subsection{Search Improvements}
-		At current the search in the system is simple in nature, it was desired to have implemented A* but this has unfortunately proven to be problematic.
+
+At current the search in the system is simple in nature, it was desired to have implemented A* but this has unfortunately proven to be problematic.
 		
-		The current search could be improved by searching for the same goal once a search is erased .
+The current search could be improved by searching for the same goal once a search is erased.
+				
+\subsection{Collision avoidance}
 		
+\subsection{Naturalistic search} 
 		
-		Collision avoidance.
+\subsection{Mapping Improvements}
+
+The mapping algorithm is simple in nature and could be improved by the use of? 
 		
-		Naturalistic search. 
-		
-	\subsection{Mapping Improvements}
-		The mapping algorithm is simple in nature and could be improved by the use of? 
-		
-		Boundary Detection (IE) can i see a wall ? is the cell adjacent a wall ? therefore i do not need to visit that cell because it won't reveal anymore information to me. 
+Boundary Detection (IE) can i see a wall ? is the cell adjacent a wall ? therefore i do not need to visit that cell because it won't reveal anymore information to me. 
 	
-		The problem of mapping is strongly linked to Maze exploration, there are several interesting maze exploration algorithms such as (Azkaban algorithm, Dead-end filling, Wall follower ) and we feel that the use of one of these would make the Bumble's discovery of areas more effectively. 
+The problem of mapping is strongly linked to Maze exploration, there are several interesting maze exploration algorithms such as (Azkaban algorithm, Dead-end filling, Wall follower ) and we feel that the use of one of these would make the Bumble's discovery of areas more effectively. 
 	
 		Out of these of  we feel that the wall follower algorithm is well suited to bumbles world would.... 
 		
 		Talk about wall follower.
+		
+\subsection{Objectives}
 
+We could also add some sort of objectives system to the game to allow Bumble to actually plan his `method of attack'. Creating some basic rules which 
+
+\subsection{Exploration}
+
+\subsection{Machine Learning}
+
+Another way that Bumble could be improved is by implementing machine learning techniques to allow him to develop a knowledgebase as he explores the world. Having both completed final year projects in this area, this is an area of great interest to us. The main factor holding us back was our inexperience using Prolog. 
+
+Reinforcement learning's reward-punishment system would be particularly well suited to the VWorld environment; there could be various rewards given to Bumble for collecting items, catching the bird etc. Bumble could also be punished for pushing wasps and other dangerous objects. These rewards would encourage Bumble to perform well. Care would have to be taken to make sure that over-fitting doesn't occur (i.e. that Bumble doesn't learn lessons which are too specific to individual levels). The knowledge that Bumble develops would ideally be able to be applied to all levels.
+		
 \end{document}
