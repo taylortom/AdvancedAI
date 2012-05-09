@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.8)  8 MAY 2012 18:07
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2011.11.8)  9 MAY 2012 10:53
 entering extended mode
 **BumbleDocumentation.tex
 
@@ -339,10 +339,7 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 96.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
-)
-! I can't write on file `BumbleDocumentation.pdf'.
-Please type another file name for output: BumbleDocumentation.pdf
-[1
+) [1
 
 {C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}]
 LaTeX Font Info:    Try loading font information for OMS+cmr on input line 133.
@@ -367,13 +364,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
  )
 (\end occurred inside a group at level 2)
 
-### semi simple group (level 2) entered at line 253 (\begingroup)
+### semi simple group (level 2) entered at line 237 (\begingroup)
 ### semi simple group (level 1) entered at line 68 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
  6088 strings out of 494049
  86771 string characters out of 3146032
- 192670 words of memory out of 3000000
+ 191670 words of memory out of 3000000
  9293 multiletter control sequences out of 15000+200000
  12236 words of font info for 47 fonts, out of 3000000 for 9000
  715 hyphenation exceptions out of 8191
@@ -386,7 +383,7 @@ mr10.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr1
 fb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 ><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pfb><
 C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on BumbleDocumentation.pdf (5 pages, 120748 bytes).
+Output written on BumbleDocumentation.pdf (5 pages, 118576 bytes).
 PDF statistics:
  50 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

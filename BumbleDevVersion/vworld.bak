@@ -1880,8 +1880,7 @@ vact(bird,_,_) :-
 		;
 		 Object = birdseed
 	   )),
-	vfind_in_inventory(Object),
-	write('BUMBLE HAS SEED YAYAYAYAY!').
+	vfind_in_inventory(Object).
 
 
 vact(bird,X,Y) :-
