@@ -374,12 +374,11 @@ bumble([_,_,Inventory,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) 
 
 
 %If Obj is snail and bumble is not holding bugspray move away
-bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(InvDir)) :-
+bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Obj,[NW,N,NE,W,E,SW,S,SE],Pos),
 	threatening(Obj),
 	Obj = snail,
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Pos),
-	move_toward_x(Dir,InvDir).
+	away_from(Obj,[NW,N,NE,W,E,SW,S,SE],Dir).
 
 %	move_away_x(Dir,InvDir).
 
