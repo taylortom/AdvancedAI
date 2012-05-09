@@ -76,7 +76,7 @@ is_bumble_hurt(Damage) :-
 	assert(hurt_status(critically_hurt)).
 
 is_bumble_hurt(Damage) :-
-	Damage > 50,
+	Damage > 40,
 	nl, write('Medium hurt'),
 	retractall(hurt_status(_)),
 	assert(hurt_status(medium_hurt)).
@@ -126,10 +126,35 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
 % Consume any nearby fruit.
 
+
+% push crosses if hurt
+
+bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	interesting(Obj),
+	Obj = cross,
+	heal(Strength,Damage),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+% push trees if hungry
+
 bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
 	member(fruit,[NW,N,NE,W,E,SW,S,SE],Num),
 	eat(Strength,Damage),
 	member(Dir,[nw,n,ne,w,e,sw,s,se],Num).
+
+bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
+	\+ retract(pushed),
+	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
+	interesting(Obj),
+	Obj = tree, 
+	eat(Strength,Damage),
+	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
+	assert(pushed).
+
+
 
 % Collect any nearby desirable object.
 
@@ -157,28 +182,6 @@ desirable(shield).
 
 
 
-
-% push crosses if hurt
-
-bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	\+ retract(pushed),
-	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
-	interesting(Obj),
-	Obj = cross,
-	heal(Strength,Damage),
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
-	assert(pushed).
-
-% push trees if hungry
-
-bumble([Strength,Damage,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(Dir)) :-
-	\+ retract(pushed),
-	member(Obj,[NW,N,NE,W,E,SW,S,SE],Num),
-	interesting(Obj),
-	Obj = tree, 
-	eat(Strength,Damage),
-	member(Dir,[nw,n,ne,w,e,sw,s,se],Num),
-	assert(pushed).
 
 % Try pushing nearby interesting objects
 
@@ -288,6 +291,52 @@ bumble(_,_) :-
 	nl, write('Erasing Path as it cant be followed'), ttyflush,
 	retractall(path(_,_)). % retract the current path.
 	
+
+
+
+% If hungry search for tree
+bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
+	eat(Strength,Damage),
+	here(Current_X,Current_Y),
+	findall((X,Y),path(X,Y),NPath),
+	NPath = [], % if the path null
+	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
+	find_path(greedy, tree,(Current_X,Current_Y),Path), % Find path to nearest tree
+	remove_first_from_list(Path, FirstRemoved), % Pop the first item as it's the current position
+	update_bumble_path_x(FirstRemoved), %Store the new path
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush,
+	nl, write('Search Completed').
+	%TODO: Possible extension follow path now.
+
+% If hungry and no tree search for fruit
+bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
+	eat(Strength,Damage),
+	here(Current_X,Current_Y),
+	findall((X,Y),path(X,Y),NPath),
+	NPath = [], % if the path null
+	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
+	find_path(greedy, fruit,(Current_X,Current_Y),Path), % Find path to nearest tree
+	remove_first_from_list(Path, FirstRemoved), % Pop the first item as it's the current position
+	update_bumble_path_x(FirstRemoved), %Store the new path
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush,
+	nl, write('Search Completed').
+	%TODO: Possible extension follow path now.
+
+
+% If hurt and no current search generate path to nearest cross
+bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
+	heal(Strength,Damage), % if needs to heal 
+	here(Current_X,Current_Y), % get current position
+	findall((X,Y),path(X,Y),NPath), % Get the current path 
+	NPath = [], % if the path null
+	nl, write('Hurt, check to see if i have seen a cross in my map'),nl,ttyflush,
+%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
+	find_path(greedy, cross,(Current_X,Current_Y),Path), % Find path to nearest cross
+	remove_first_from_list(Path, FirstRemoved), % remove the first item off the list
+	update_bumble_path_x(FirstRemoved), % Store the newly formed path
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
+	nl, write('Search Completed').
+	%TODO: Possible extension follow path now.
 
 
 
@@ -434,7 +483,7 @@ find_path(SearchType,Goal,Start,Path) :-
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
 	%nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
-	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[],100), 
+	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[],150), 
 	reverse(ReversedPath,Path). % reverse it - start-to-goal 
 	%nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
 
@@ -634,52 +683,6 @@ is_movable(hornet).
 % Search clauses
 %
 %
-
-
-
-% If hungry search for tree
-bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
-	eat(Strength,Damage),
-	here(Current_X,Current_Y),
-	findall((X,Y),path(X,Y),NPath),
-	NPath = [], % if the path null
-	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
-	find_path(greedy, tree,(Current_X,Current_Y),Path), % Find path to nearest tree
-	remove_first_from_list(Path, FirstRemoved), % Pop the first item as it's the current position
-	update_bumble_path_x(FirstRemoved), %Store the new path
-	nl, write(' Path: ' - FirstRemoved),nl,ttyflush,
-	nl, write('Search Completed').
-	%TODO: Possible extension follow path now.
-
-% If hungry and no tree search for fruit
-bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
-	eat(Strength,Damage),
-	here(Current_X,Current_Y),
-	findall((X,Y),path(X,Y),NPath),
-	NPath = [], % if the path null
-	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
-	find_path(greedy, fruit,(Current_X,Current_Y),Path), % Find path to nearest tree
-	remove_first_from_list(Path, FirstRemoved), % Pop the first item as it's the current position
-	update_bumble_path_x(FirstRemoved), %Store the new path
-	nl, write(' Path: ' - FirstRemoved),nl,ttyflush,
-	nl, write('Search Completed').
-	%TODO: Possible extension follow path now.
-
-
-% If hurt and no current search generate path to nearest cross
-bumble([Strength,Damage,_,_,_,_,_,_,_],sit) :-
-	heal(Strength,Damage), % if needs to heal 
-	here(Current_X,Current_Y), % get current position
-	findall((X,Y),path(X,Y),NPath), % Get the current path 
-	NPath = [], % if the path null
-	nl, write('Hurt, check to see if i have seen a cross in my map'),nl,ttyflush,
-%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
-	find_path(greedy, cross,(Current_X,Current_Y),Path), % Find path to nearest cross
-	remove_first_from_list(Path, FirstRemoved), % remove the first item off the list
-	update_bumble_path_x(FirstRemoved), % Store the newly formed path
-	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
-	nl, write('Search Completed').
-	%TODO: Possible extension follow path now.
 
 
 
