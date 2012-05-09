@@ -347,7 +347,7 @@ find_path(SearchType,Goal,Start,Path) :-
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
 	%nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
-	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[]), 
+	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[],60), 
 	reverse(ReversedPath,Path). % reverse it - start-to-goal 
 	%nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
 
@@ -362,10 +362,13 @@ find_path(SearchType,Goal,Start,Path) :-
 %	reverse(ReversedPath,Path). % reverse it start-to-goal path 
 
 
-search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
+search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % first node 
 	%nl, write(' First Node Is : ' - Path),nl,ttyflush, 
 	solution(Path). % goal tile? 
 	
+
+search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :-
+	Iterations = 0.
 
 %search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) 	:- 
 %	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % next poss 
@@ -378,7 +381,11 @@ search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node
 %	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED, NextSetOfNodes_2).	 
 	
 
- search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN) :- % from the current tile 
+ search([FirstNode|RestOfNodes],Solution,Goal_X,Goal_Y,CLOSED,OPEN,Iterations) :- % from the current tile 
+	% nl, write(' Iterations Remaining: ' - Iterations),nl,ttyflush, 
+ 	% DIRTY HACK: this has been implemented to stop recusion overflows crashing the application. 
+	% this is a far from ideal solution however it has increased the success of the program overal
+	Iterout is Iterations-1, 
 	generate_new_nodes(FirstNode,NewNodes,Goal_X,Goal_Y), % generate next poss tiles 
 	insert_nodes(NewNodes,RestOfNodes,NextSetOfNodes), % add to OPEN 
 	!, 
@@ -386,7 +393,7 @@ search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node
 	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
 %	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
 %	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
-	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2). % recurse with new list 
+	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2,Iterout). % recurse with new list 
 
 
 
@@ -429,7 +436,6 @@ add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first
 	append([First],CLOSED,New_CLOSED). % append as a list.. [First] 
 
 
-
 % call with (e.g.) 
 % find_path(breadth_first,tree,(0,0),_). 
 %:- dynamic [search_type/1, mygoal/1]. 
@@ -458,8 +464,6 @@ add_to_CLOSED([First|Rest],CLOSED,New_CLOSED):- % strip off the first
 % not allow circular Paths to be built. Of course, we would
 % have to define generate_new_nodes/3 differently for a
 % different domain.
-
-
 generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :- 
 	findall([Cost,(XX,YY),(X,Y)|Rest], % given these terms 
 	( 
@@ -481,29 +485,6 @@ generate_new_nodes([C,(X,Y)|Rest],Paths,Goal_X,Goal_Y) :-
 	get_cost(XX,YY,Goal_X,Goal_Y,Cost) % h(n)calculation 
 	), 
 	Paths). % this is the list of possible locations 
-
-
-%generate_new_nodes([(X,Y)|Rest],Paths) :-
-%	findall([(XX,YY),(X,Y)|Rest],
-%	(
-%	 Xminus is X - 1,
-%	 Xplus is X + 1,
-%	 Yminus is Y - 1,
-%	 Yplus is Y + 1,
-%	 member(XX,[Xminus,X,Xplus]),
-%	 member(YY,[Yminus,Y,Yplus]),
-%	 mymap(XX,YY,Obj),
-%	 \+ member((XX,YY),[(X,Y)|Rest]),
-%	 (
-%	  mygoal(Obj)
-%	 ;
-%	  member(Obj,[o,door])
-%	 ;
-%	  can_remove(Obj) %this should possibly be changed to desireable.
-%	 )
-%	),
-%	Paths).
-
 
 get_cost(XX,YY,X,Y,Cost):- 
 	S1 is sign(XX), % sign returns -1, 0 or 1 
@@ -567,51 +548,33 @@ is_movable(hornet).
 
 % if hungry search for tree
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	%fail,
 	eat(Strength,Damage),
 	here(Current_X,Current_Y),
 	findall((X,Y),path(X,Y),NPath),
 	NPath = [], % if the path null
-%	last_seen(tree,Goal_X,Goal_Y),
-%	retractall(mygoal(_)), Bad this is defined automatically in search!
-%	assert(mygoal(tree)),
-%	nl, write('Hungry, check to see if i have seen a tree in my map'),nl,ttyflush,
-	%find_path_to(X,Y),
-%	interesting(Obj),
-%	Obj = tree,
-%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
-%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
-	find_path(greedy, tree,(Current_X,Current_Y),Path), 
-%	assert(path(Path)),
-%	assert(update_bumble_path_x(Path)),
-	remove_first_from_list(Path, FirstRemoved),
-	update_bumble_path_x(FirstRemoved),
-	nl, write(' Path: ' - FirstRemoved),nl,ttyflush.
-%	nl, write('Search Completed').
+	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
+	find_path(greedy, tree,(Current_X,Current_Y),Path), % Find path to nearest tree
+	remove_first_from_list(Path, FirstRemoved), % Pop the first item as it's the current position
+	update_bumble_path_x(FirstRemoved), %Store the new path
+	nl, write(' Path: ' - FirstRemoved),nl,ttyflush,
+	nl, write('Search Completed').
+	%TODO: Possible extension follow path now.
+
 
 % if hurt and no current search generate path to nearest cross
 bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
-	%fail,
-	heal(Strength,Damage),
-	here(Current_X,Current_Y),
-	findall((X,Y),path(X,Y),NPath),
+	heal(Strength,Damage), % if needs to heal 
+	here(Current_X,Current_Y), % get current position
+	findall((X,Y),path(X,Y),NPath), % Get the current path 
 	NPath = [], % if the path null
-%	last_seen(tree,Goal_X,Goal_Y),
-%	retractall(mygoal(_)), Bad this is defined automatically in search!
-%	assert(mygoal(tree)),
-	nl, write('Hungry, check to see if i have seen a cross in my map'),nl,ttyflush,
-%	find_path_to(X,Y),
-%	interesting(Obj),
-%	Obj = tree,
-%	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
-	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
-	find_path(greedy, cross,(Current_X,Current_Y),Path), 
-%	assert(path(Path)),
-%	assert(update_bumble_path_x(Path)),
-	remove_first_from_list(Path, FirstRemoved),
-	update_bumble_path_x(FirstRemoved),
+	nl, write('Hurt, check to see if i have seen a cross in my map'),nl,ttyflush,
+%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
+	find_path(greedy, cross,(Current_X,Current_Y),Path), % Find path to nearest cross
+	remove_first_from_list(Path, FirstRemoved), % remove the first item off the list
+	update_bumble_path_x(FirstRemoved), % Store the newly formed path
 	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
+	%TODO: Possible extension follow path now.
 
 
 %YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
@@ -619,50 +582,47 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 
 %Recursive iterator that add items in supplied list to the path
 update_bumble_path_x([_|List]):-
-	List = [],
+	List = [], % if list is empty
 	true.
 
 update_bumble_path_x([(X,Y)|_]):-
-	\+ path(X,Y),
-	retractall(path(X,Y)),
-	assert(path(X,Y)),
+	\+ path(X,Y), %if path doesn't contain X Y is this really needed..
+	retractall(path(X,Y)), %remove all X Y 
+	assert(path(X,Y)), % add X Y to path
 	nl, write('Adding '), write(X),write(Y), write(' to path'),
 	fail.
 
 update_bumble_path_x([_|RestOfList]):- 
-	update_bumble_path_x(RestOfList).
+	update_bumble_path_x(RestOfList). %Recuse through list
 
 
-remove_first_from_list([_|Tail], Tail):-
+remove_first_from_list([_|Tail], Tail):- %Pop the first item on the given list retunin the tail
 	true.
 
 %
 % Take Path
 %
 
-% Check if we're already following a path if so follow path
+% Check if we're already have a path so follow it!
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-	 
 	findall((X,Y),path(X,Y),Path),
-	\+ Path = [],
-	Path = [(NewX,NewY)|_],
-	here(CurrentX,CurrentY),
+	\+ Path = [], % if path is not null
+	Path = [(NewX,NewY)|_], % Path is a list of cords
+	here(CurrentX,CurrentY), % get the current location 
 %	nl, write('CurrentPosition('), write(CurrentX), write(','), write(CurrentY), write(')'), ttyflush,
-	retract(path(NewX,NewY)),
+	retract(path(NewX,NewY)), % pop the first item off the path list
 %	nl, write('NextPosition('), write(NewX), write(','), write(NewY), write(')'), ttyflush,
-	heading(CurrentX, NewX, X_Mov),
-	heading(CurrentY, NewY, Y_Mov),
+	heading(CurrentX, NewX, X_Mov), % calculate direction on the x axis
+	heading(CurrentY, NewY, Y_Mov), % calculate direction on the y axis
 %	nl, write('X_Mov is '), write(X_Mov), write(' Y_Mov is '), write(Y_Mov),ttyflush,
-	coordDirection(X_Mov, Y_Mov, DIR),
+	coordDirection(X_Mov, Y_Mov, DIR), % given directions assert compass direction
 %	nl, write('DIR is '), write(DIR),
 	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	can_remove(Visitable), % is open or visited.
 	member(Visitable,[NW,N,NE,W,E,SW,S,SE],Num). % is open ? 
 
-%MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-
 
 % If following the path has failed try moving into an ajacient cell this will remove the current path
-
 bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-	 
 	findall((X,Y),path(X,Y),Path),
 	\+ Path = [],
@@ -684,20 +644,15 @@ bumble([_,_,_,_,_,[_,NW,N,NE,_],[_,W,_,E,_],[_,SW,S,SE,_],_],move(DIR)) :-
 %	member(GoToward,[nwnw,nnw,nn,nne,nene,swsw,ssw,ss,sse,sese,wnw,ww,wsw,ene,ee,ese],Num),
 %	member(DIR,[nw,n,ne,w,e,sw,s,se],Num),
 	
-%on a path but can't follow Remove the current path!
-
-
-
+%on a path but can't follow, then Remove the current path!
 bumble(_,_) :-
-	findall((X,Y),path(X,Y),Path),
-	\+ Path = [],
+	findall((X,Y),path(X,Y),Path), % fetch the current path 
+	\+ Path = [], % if the current path is blank
 	nl, write('Erasing Path as it cant be followed'), ttyflush,
-	retractall(path(_,_)).
+	retractall(path(_,_)). % retract the current path.
 	
+%TODO: possible feature add new path generation here to ensure same goal? 
 
-
-
-%possible feature add new path generation here to ensure same goal? 
 
 % If there's something desirable two squares away, move towards it
 bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_,_,ESE],[SWSW,SSW,SS,SSE,SESE]],move(Dir)) :-
@@ -710,13 +665,6 @@ bumble([_,_,_,Last,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE],[WSW,_,_
 	nl, write('Something desirable!! move towards it!! '), write(Dir).
 
 
-
-
-%TODO add condition! bubmlle can't move into any space! the path will have to be removed.
-
-
-
-%NEED SOME CHECK TO SEE IF THE CELL IS OCUPIED. 
 
 %if this is the case then take the first item off the path and use the move
 %toward command then erase teh path. 

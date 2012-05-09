@@ -1,2 +1,10 @@
 testAddition(X, Y, Z) :-
-Z = X+Y.
+Z is X+Y.
+
+
+
+CountDown(Remaining):-
+nl, write(' Remaing : ' - Remaining),nl,ttyflush,
+Remaining > 0,
+SubRemaing is Remaining-1, 
+CountDown(SubRemaing).
