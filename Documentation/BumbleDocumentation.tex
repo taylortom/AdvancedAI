@@ -143,6 +143,7 @@ We used the test levels to create a basic 'specification' of the kind of behavio
 	\item Some form of search
 	\item Refine Bumble's strength/damage system
 	\item Implement some exploration
+	\item Be able to avoid the evil characters
 \end{itemize}
 
 Our overall goal was to iterate rather than to innovate, by developing the existing behaviour, fixing existing issues, and by implementing more incremental changes.
@@ -152,16 +153,12 @@ Our overall goal was to iterate rather than to innovate, by developing the exist
 To start us off, we were given a very basic Bumble which we could use as a starting point for our development. The original Bumble was able to randomly explore the environment, but little else. In the tutorial sessions, we began to develop some basic behaviour for Bumble. By the end of the tutorials, Bumble was able to:
 
 \begin{itemize}
+	\item Eat fruit if he was hungry
+	\item Push the cross if he was hurt
 	\item Randomly navigate the world
 	\item Pick up any interesting/desirable objects he was stood next to
+	\item Dynamically generate a map of the world as he explores it
 \end{itemize}
-
-
-
-
-
-By the end of the tutorials, Bumble was able to move around the game world, and build a 'map' of where certain objects were located as they were found. 
-
 
 Bumble has a few basic stats which are updated as he roams the level: strength, which decreases as Bumble moves around the level and can be replenished with tasty apples, and damage, which is incremented if Bumble is attacked. Bumble dies if either his strength reaches 0, which means he is unable to move, or if his damage reaches 100\%.
 
@@ -177,35 +174,21 @@ One of the key elements in our strategy was the smaller, more incremental change
 
 One of the first changes we made was to add extra predicates to allow Bumble to spot interesting and desirable objects from two squares away, and move towards them (as he does with the tree/cross). This obviously meant that Bumble was more likely to pick up these useful objects whilst exploring. We also ordered these predicates in a logical was to reflect the priority that Bumble would use. These priorities for removable objects (including crosses and trees) is given below:
 
-\singlespace
 \begin{enumerate}
+	\item Push cross
 	\item Eat fruit
 	\item Push tree
-	\item Push cross
+	\item Move towards cross
+	\item Move towards tree
+	\item Move towards fruit
 	\item Collect desirable object
 	\item Collect interesting object
 	\item Catch bird \footnote{If Bumble is next to a bird and has birdseed, he can catch the bird. We discovered a bug (or maybe a feature?) whereby the bird was afraid of the bugspray, so Bumble also needed to drop the bugspray before catching the bird}
-	\item Move towards cross
-	\item Move towards tree
 \end{enumerate}
-\onehalfspace
 
+We modified most of Bumble's behaviour with regards to the NPCs in the game. The dragon is by far the most dangerous character in the game, as it can cause instant death. We programmed Bumble to run away from dragons unless he's in possession of the sword. In the case of the hornet, we wanted Bumble run away (unless he has the deadly bugspray, at which point he approaches and kills the hornets). We also made Bumble move away from the snails where possible, as they were causing issues by blocking his path and pinning him in corners.
 
-
-The hornets follow Bumble upon spying him.
-
-Bumble no longer flees if in possession of the shield/sword
-
-Fixed a bug whereby Bumble could get stuck alternating between two interesting objects (e.g. tree/cross)
-
-Hornets no longer cause injury if Bumble's in possession of the bugspray. Also, the bugspray now actually works.
-
-Fixed a bug whereby Bumble could get stuck in a corridor 1 sq wide (see castle2.vw). 
-If there was an interesting/ desirable object at the end of the corridor, Bumble would try to go west, but would simple stay in the same sqaure. There's now a check to see if Bumble already attempted the same move, if so, he moves randomly.
-
-A map of the entire level is built. When Bumble goes through a door, an extra square is added in the appropriate direction to account for the wall in-between the levels. 
-
-As removable items are taken by Bumble, they are also removed from the map.
+We found a number of bugs in the original system which we fixed as a matter of course. One such bug being that Bumble could get stuck in a corridor one square wide if there was an interesting or desirable object to the north or south (an example of where this error was occurring is \emph{castle2.vw}). The reason this was occurring was because of the order in which Bumble tries to move toward objects. For some reason, he was trying to move west repeatedly. I fixed this by getting Bumble to move randomly if he moves in the same direction twice in a row, without actually changing his position on the map.
 
 \section{New Features}
 
@@ -255,6 +238,12 @@ The method by which Bumble explores the environment is very naive. It simply loo
 	
 As we were working in a pair, it was very important to ensure that we put some measure in place to make sure that we could collaborate efficiently without causing any corruption by editing the same file at the same time. This was particularly important for this project, as we were only really working from a single source file. Using source control also means that we were also creating incremental backups of the project, which was very useful to compensate for data loss.
 
+\begin{figure}[h!]
+  \centering
+	\includegraphics[width=0.8\textwidth]{issues.png}
+	\caption{Github's Issues Feature}
+\end{figure}
+
 We decided to use the Git version control system for this. Using Git, we made use of the branching feature, which allowed us both to create a separate `branch' of the code, which we could then work on two implement a new feature. After the feature had been implemented and tested, we could then merge that branch back into the main branch. This development process worked well.
 
 We used Github to host our Git repository. As a side product of this, we were also able to make use of Github's 'Issues' feature, which allows all team members to add 
@@ -266,9 +255,9 @@ We have utilised the set of test maps supplied with bumble to evaluate the effec
 	\subsection{Bird One}
 
 		\begin{figure}[h!]
-		  \caption{Screenshot of bumble compleating bird one.}
 		  \centering
 			\includegraphics[width=0.5\textwidth]{bumbleBird1.png}
+			\caption{Screenshot of bumble completing bird one.}
 		\end{figure}
 
 
@@ -315,11 +304,15 @@ We have utilised the set of test maps supplied with bumble to evaluate the effec
 %	\label{tab:myfirsttable}
 %\end{table}
 
-\section{Analysis}
-
-What we found out from the results
-
 \section{Conclusions}
+
+From our testing of the system, we were able to draw a number of conclusions with regards to the actual performance of it, and areas which we feel still need work.
+
+More advanced and a greater number of predicates are needed for Bumble to complete the later levels.
+
+The maintenance of the system became increasingly difficult as the number of predicates increased. Additionally, the order in which predicates are carried out (and ordered in the source file) is key to how the system performs. We found this to be a particularly tricky issue to deal with, as we found it very easy to upset the balance of things by including extra predicates in inappropriate places in the source.
+
+Hard to use strong software engineering principles to this kind of system (or at least we haven't been able to apply what we know to it)
 
 \section{Further Work}
 
@@ -334,24 +327,16 @@ The current search could be improved by searching for the same goal once a searc
 \subsection{Collision avoidance}
 		
 \subsection{Naturalistic search} 
-		
-\subsection{Mapping Improvements}
-
-The mapping algorithm is simple in nature and could be improved by the use of? 
-		
-Boundary Detection (IE) can i see a wall ? is the cell adjacent a wall ? therefore i do not need to visit that cell because it won't reveal anymore information to me. 
-	
-The problem of mapping is strongly linked to Maze exploration, there are several interesting maze exploration algorithms such as (Azkaban algorithm, Dead-end filling, Wall follower ) and we feel that the use of one of these would make the Bumble's discovery of areas more effectively. 
-	
-		Out of these of  we feel that the wall follower algorithm is well suited to bumbles world would.... 
-		
-		Talk about wall follower.
-		
+				
 \subsection{Objectives}
 
-We could also add some sort of objectives system to the game to allow Bumble to actually plan his `method of attack'. Creating some basic rules which 
+We could also add some sort of objectives system to the game to allow Bumble to actually plan his `method of attack'. Creating some basic rules which would specify some appropriate behaviour based on Bumble's current state could accomplish this. For example, say Bumble came across some birdseed in the level, it would be useful for Bumble to then be able to search his map to see if he had seen a bird, and then create a path to it. This behaviour would also be helpful in the case of locked doors; if Bumble finds a key to a door he has already seen, it would be useful to be able to use the search to get back there.
 
 \subsection{Exploration}
+
+The exploration in our final version of Bumble, although an improvement over the basic Bumble, is still very naive in the way it functions. As it is, Bumble only checks for unvisited squares in his immediate vicinity, and follows a very rigid order. This means that when viewed on screen, Bumble's exploration method seems very erratic and unrealistic. Additionally, this method is incredibly slow as it is essentially a brute-force-style search of the map; visiting every square in a room. In reality, this level of thoroughness is not needed, as Bumble's perceptions allow him to view up to two squares away from him in every direction. 
+
+A very simple improvement which could be made to this could be to take into account the `outer ring' of squares in addition to the `inner ring'. This information could then be used so that Bumble is able to move in the direction which contains more unvisited squares. However, this wouldn't fix the erratic and seeming random way that Bumble moves around. A possible fix to this problem could be to implement a maze-solving algorithm to provide a more methodical and wider-spanning exploration of the map. One possible and popular algorithm is the `wall follower', which would make Bumble `hug' the wall as he moves around the map. The major benefit to this algorithm is that it ensures that Bumble wouldn't get `lost', and also that he reaches a different exit to the one by which he entered.
 
 \subsection{Machine Learning}
 
