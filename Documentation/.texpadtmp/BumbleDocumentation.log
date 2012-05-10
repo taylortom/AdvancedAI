@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  10 MAY 2012 01:19
+This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  10 MAY 2012 01:22
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -360,7 +360,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 [6]
 File: bumbleBird1.png Graphic file (type QTm)
- <use  "bumbleBird1.png" > [7] [8] [9] [10]
+ <use  "bumbleBird1.png" > [7] [8] [9]
 (/Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -380,4 +380,4 @@ Here is how much of TeX's memory you used:
  37i,8n,49p,1236b,675s stack positions out of 5000i,500n,10000p,200000b,50000s
 
 Output written on /Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumenta
-tion.pdf (11 pages).
+tion.pdf (10 pages).
