@@ -276,18 +276,32 @@ We have utilised the set of test maps supplied with bumble to evaluate the effec
 	
 	Firstly is the issue of dealing with the wasps contained on the map, as these will attack bumble, these are also set to guard the bird seed. Bumble will generally avoid these hornets very well however quite often they will manage to damage him because of this it is essential bumble know the position of the heart and the tree so he can return to to these and recover, with out the mapping and search components this would not have been possible and bumble would have dropped off his mortal coil. 
 	
-	The snail presents a real issue to Bumble as it will often destroy his ability to search effectively because as it will follow him incessantly and get in his way, the snail can block bumble up against a wall causing him to starve to death, this is also an issue prevalent when the wasp and snail block Bumble in.
+	The snail presents a real issue to Bumble as it will often destroy his ability to search effectively because as it will follow him incessantly and get in his way, the snail can block bumble up against a wall causing him to starve to death, this is also an issue prevalent when the wasp and snail block Bumble in. This issue is present through most of our testing and has greatly effected our success as NPC's will lock bumble against against a wall and kill him.  .  
 
 	
 	\subsection{Test 1}
-		Bumble will generally perfom well in this wolrd however this should be a given as there are a large amount of resources and a only one hornet to attack him, our perfomance with the current system is not as optimal as it has previously been where bumble could go infiniatly. To resolve the current issue with the system we feel that we need to improve the get closest method as this isn't actually giving and optimal goal. 
+		Bumble will generally perform well in this world however this should be a given as there are a large amount of resources and a only one hornet to attack him, our performance with the current system is not as optimal as it has previously been where bumble could go infinitely. To resolve the current issue with the system we feel that we need to improve the get closest method as this isn't actually giving and optimal goal. 
 		
 	\subsection{Test 2}
-		The perfomance in this test is simalr to the the last test,  as bumble will now only survive a finite amount of time where he would previously 
+		 In this test the supplied 1.5 version will survive far longer than the current 1.6 version we have been unable to detect the difference between these two version that is causing this issue. It should also be noted that the even earlier versions of the system 1.3 onward will also do very well in this test.
 		
+		\subsection{Test 3}
+		Our success on this test is minimal due to high amount of hornets and that they amplify the blocking issue that was previously present. 
 		
-		we belive that this isse has arise because the wasp is capable of holding bumble oagainst the wall and killing him
+		\subsection{Test 4}
+		Again bumble will die very fast on this test due to the wasp block bug. s
+		
 	
+	\subsection{Test 5}
+	Bumbles performance on this level is very close to working and we feel that this is a good demonstration of the features we have implemented, Bumble will effectively explore the world finding both the cross and the heart in more runs however Bumble will pause due to a recursion overflow issue when performing search from one side of the map to the other, this issue is a massive restriction with our current system and we have stopped this from crashing the application by putting a maximum iterations value however this is essentially a hack and does not solve the underlying issue with the search algorithm. 
+	
+	
+	\subsection{Test 6}
+	We have noted a vast improvement in the performance of Bumble in this level, as he is now able to negotiate the hall of snails however he has little overall control, the search is not at a level where he is able to traverse from room to room. Bumble can get surrounded by snails and this will cause a similar issue to wasp blocking where he will continually search for a path to the tree or a heart.
+	
+	
+	\subsection{Test 7}
+	This level is similar in nature to the previous however keys are required to unlock the doors, Bumble is capable of getting to the the middle corridor however he will often become immediately locked in by the snails as has happened in may of the previous levels. 
 	
 	
 %\begin{table}[h!]

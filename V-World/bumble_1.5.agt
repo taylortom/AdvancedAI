@@ -237,8 +237,6 @@ bumble([Strength,Damage,_,_,[NWNW,NNW,NN,NNE,NENE],[WNW,_,_,_,ENE],[WW,_,_,_,EE]
 % Search
 %
 %
-%XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
 % NOTE A lot of the code currently contained in this section is GW's
 
 
@@ -346,7 +344,6 @@ find_path(SearchType,Goal,Start,Path) :-
 		Goals), 
 	Goals \= [],
 	get_closest(Goals, X_Goal,Y_Goal), 
-	nl,write('Goal X= ' - X_Goal), write(' Goal Y' - Y_Goal ),nl,ttyflush,
 	search([[Cost,Start]],ReversedPath,X_Goal,Y_Goal,[],[]), 
 	reverse(ReversedPath,Path), % reverse it - start-to-goal 
 	nl,write('Path = ' - Path),nl,ttyflush. % print it - final path 
@@ -363,7 +360,6 @@ find_path(SearchType,Goal,Start,Path) :-
 
 
 search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node 
-	nl, write(' First Node Is : ' - Path),nl,ttyflush, 
 	solution(Path). % goal tile? 
 	
 
@@ -384,8 +380,8 @@ search([[_|Path]|_],Path,Goal_X,Goal_Y,CLOSED,OPEN) :- % first node
 	!, 
 	add_to_CLOSED(NextSetOfNodes,CLOSED,New_CLOSED), % put the next node (best) on CLOSED 
 	check_CLOSED(NextSetOfNodes,New_CLOSED,NextSetOfNodes_2), % better path on CLOSED? 
-	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
-	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
+%	nl, write(' NextSetOfNodes (OPEN): ' - NextSetOfNodes_2),nl,ttyflush, 
+%	nl, write(' CLOSED: ' - New_CLOSED),nl,ttyflush, 
 	search(NextSetOfNodes_2,Solution,Goal_X,Goal_Y,New_CLOSED,NextSetOfNodes_2). % recurse with new list 
 
 
@@ -580,13 +576,13 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %	interesting(Obj),
 %	Obj = tree,
 %	nl, write('Gloal X : '), write(Goal_X), write('Y : ') , write(Goal_Y), ttyflush ,
-	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
+%	nl, write('Current X : '), write(Current_X), write('Y : ') , write(Current_Y), ttyflush,
 	find_path(greedy, tree,(Current_X,Current_Y),Path), 
 %	assert(path(Path)),
 %	assert(update_bumble_path_x(Path)),
 	remove_first_from_list(Path, FirstRemoved),
 	update_bumble_path_x(FirstRemoved),
-	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
+%	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
 
 % if hurt and no current search generate path to nearest cross
@@ -610,7 +606,7 @@ bumble([Strength,Damage,_,_,_,_,_,_,_],_) :-
 %	assert(update_bumble_path_x(Path)),
 	remove_first_from_list(Path, FirstRemoved),
 	update_bumble_path_x(FirstRemoved),
-	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
+%	nl, write(' Path: ' - FirstRemoved),nl,ttyflush, 
 	nl, write('Search Completed').
 
 
