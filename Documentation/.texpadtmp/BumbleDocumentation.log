@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  10 MAY 2012 00:53
+This is XeTeX, Version 3.1415926-2.3-0.9997.5 (TeX Live 2011) (format=xelatex 2011.7.3)  10 MAY 2012 01:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -352,7 +352,15 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 145.
  [2] [3] [4]
-[5] [6] [7] [8] [9]
+[5]
+File: issues.png Graphic file (type QTm)
+ <use  "issues.png" >
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[6]
+File: bumbleBird1.png Graphic file (type QTm)
+ <use  "bumbleBird1.png" > [7] [8] [9] [10]
 (/Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -363,13 +371,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 ### semi simple group (level 1) entered at line 68 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 5721 strings out of 494150
- 81791 string characters out of 3152950
- 187051 words of memory out of 3000000
- 8892 multiletter control sequences out of 15000+200000
+ 5726 strings out of 494150
+ 81831 string characters out of 3152950
+ 186051 words of memory out of 3000000
+ 8893 multiletter control sequences out of 15000+200000
  15196 words of font info for 59 fonts, out of 3000000 for 9000
  1018 hyphenation exceptions out of 8191
  37i,8n,49p,1236b,675s stack positions out of 5000i,500n,10000p,200000b,50000s
 
 Output written on /Projects/AdvancedAI/Documentation/.texpadtmp/BumbleDocumenta
-tion.pdf (10 pages).
+tion.pdf (11 pages).

@@ -153,16 +153,12 @@ Our overall goal was to iterate rather than to innovate, by developing the exist
 To start us off, we were given a very basic Bumble which we could use as a starting point for our development. The original Bumble was able to randomly explore the environment, but little else. In the tutorial sessions, we began to develop some basic behaviour for Bumble. By the end of the tutorials, Bumble was able to:
 
 \begin{itemize}
+	\item Eat fruit if he was hungry
+	\item Push the cross if he was hurt
 	\item Randomly navigate the world
 	\item Pick up any interesting/desirable objects he was stood next to
+	\item Dynamically generate a map of the world as he explores it
 \end{itemize}
-
-
-
-
-
-By the end of the tutorials, Bumble was able to move around the game world, and build a 'map' of where certain objects were located as they were found. 
-
 
 Bumble has a few basic stats which are updated as he roams the level: strength, which decreases as Bumble moves around the level and can be replenished with tasty apples, and damage, which is incremented if Bumble is attacked. Bumble dies if either his strength reaches 0, which means he is unable to move, or if his damage reaches 100\%.
 
@@ -179,25 +175,18 @@ One of the key elements in our strategy was the smaller, more incremental change
 One of the first changes we made was to add extra predicates to allow Bumble to spot interesting and desirable objects from two squares away, and move towards them (as he does with the tree/cross). This obviously meant that Bumble was more likely to pick up these useful objects whilst exploring. We also ordered these predicates in a logical was to reflect the priority that Bumble would use. These priorities for removable objects (including crosses and trees) is given below:
 
 \begin{enumerate}
+	\item Push cross
 	\item Eat fruit
 	\item Push tree
-	\item Push cross
+	\item Move towards cross
+	\item Move towards tree
+	\item Move towards fruit
 	\item Collect desirable object
 	\item Collect interesting object
 	\item Catch bird \footnote{If Bumble is next to a bird and has birdseed, he can catch the bird. We discovered a bug (or maybe a feature?) whereby the bird was afraid of the bugspray, so Bumble also needed to drop the bugspray before catching the bird}
-	\item Move towards cross
-	\item Move towards tree
 \end{enumerate}
 
-We modified most of Bumble's behaviour with regards to the NPCs.
-
-Quite a key 
-
-\begin{itemize}
-	\item The hornets follow Bumble upon spying him.
-	\item Bumble no longer flees if in possession of the shield/sword
-	\item Hornets no longer cause injury if Bumble's in possession of the bugspray. Also, the bugspray now actually works
-\end{itemize}
+We modified most of Bumble's behaviour with regards to the NPCs in the game. The dragon is by far the most dangerous character in the game, as it can cause instant death. We programmed Bumble to run away from dragons unless he's in possession of the sword. In the case of the hornet, we wanted Bumble run away (unless he has the deadly bugspray, at which point he approaches and kills the hornets). We also made Bumble move away from the snails where possible, as they were causing issues by blocking his path and pinning him in corners.
 
 We found a number of bugs in the original system which we fixed as a matter of course. One such bug being that Bumble could get stuck in a corridor one square wide if there was an interesting or desirable object to the north or south (an example of where this error was occurring is \emph{castle2.vw}). The reason this was occurring was because of the order in which Bumble tries to move toward objects. For some reason, he was trying to move west repeatedly. I fixed this by getting Bumble to move randomly if he moves in the same direction twice in a row, without actually changing his position on the map.
 
@@ -249,6 +238,12 @@ The method by which Bumble explores the environment is very naive. It simply loo
 	
 As we were working in a pair, it was very important to ensure that we put some measure in place to make sure that we could collaborate efficiently without causing any corruption by editing the same file at the same time. This was particularly important for this project, as we were only really working from a single source file. Using source control also means that we were also creating incremental backups of the project, which was very useful to compensate for data loss.
 
+\begin{figure}[h!]
+  \centering
+	\includegraphics[width=0.8\textwidth]{issues.png}
+	\caption{Github's Issues Feature}
+\end{figure}
+
 We decided to use the Git version control system for this. Using Git, we made use of the branching feature, which allowed us both to create a separate `branch' of the code, which we could then work on two implement a new feature. After the feature had been implemented and tested, we could then merge that branch back into the main branch. This development process worked well.
 
 We used Github to host our Git repository. As a side product of this, we were also able to make use of Github's 'Issues' feature, which allows all team members to add 
@@ -260,9 +255,9 @@ We have utilised the set of test maps supplied with bumble to evaluate the effec
 	\subsection{Bird One}
 
 		\begin{figure}[h!]
-		  \caption{Screenshot of bumble compleating bird one.}
 		  \centering
 			\includegraphics[width=0.5\textwidth]{bumbleBird1.png}
+			\caption{Screenshot of bumble completing bird one.}
 		\end{figure}
 
 
@@ -294,10 +289,6 @@ We have utilised the set of test maps supplied with bumble to evaluate the effec
 %	\caption{This table shows some data}
 %	\label{tab:myfirsttable}
 %\end{table}
-
-\section{Analysis}
-
-What we found out from the results
 
 \section{Conclusions}
 
