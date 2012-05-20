@@ -250,7 +250,7 @@ We used Github to host our Git repository. As a side product of this, we were al
 	
 \section{Testing and Analysis}
 
-We have utilised the set of test maps supplied with bumble to evaluate the effectiveness of our solution. In this experimentation we work with the assumption that if bumble survives more than 5000 moves he will live infinitely.
+We have utilised the set of test maps supplied with bumble to evaluate the effectiveness of our solution, this section will give an overview of these tests and will also provide us will an insight into how the behaviours implemented perform.
 	
 	\subsection{Bird One}
 
@@ -263,22 +263,21 @@ We have utilised the set of test maps supplied with bumble to evaluate the effec
 
 	The map bird one requires bumlbe to collect the birdseed and capture the bird whilst avoiding other agents on the map.  Generally bumble will survive this map 40 \% of the time, this success depends on several key features we have implemented in bumble. 
 	
-	Firstly is the issue of dealing with the wasps contained on the map, as these will attack bumble, these are also set to guard the bird seed. Bumble will generally avoid these hornets very well however quite often they will manage to damage him because of this it is essential bumble know the position of the heart and the tree so he can return to to these and recover, with out the mapping and search components this would not have been possible and bumble would have dropped off his mortal coil. 
+	Firstly is the issue of dealing with the wasps contained on the map, as these will attack bumble, these are also set to guard the bird seed. Bumble will generally avoid these hornets very well, however quite often they will manage to damage him, because of this it is essential bumble know the position of the heart and the tree so he can return to to these and recover. With out the mapping and search components this would not have been possible and bumble would have dropped off his mortal coil long before capturing the bird. 
 	
-	The snail presents a real issue to Bumble as it will often destroy his ability to search effectively because as it will follow him incessantly and get in his way, the snail can block bumble up against a wall causing him to starve to death, this is also an issue prevalent when the wasp and snail block Bumble in. This issue is present through most of our testing and has greatly effected our success as NPC's will lock bumble against against a wall and kill him.  .  
+	The snail presents a real issue to Bumble as it will often destroy his ability to search effectively because as it will follow him incessantly and get in his way, the snail can block bumble up against a wall causing him to starve to death, this is also an issue prevalent when the wasp and snail block Bumble in. This issue is present through most of our testing and has greatly effected our success as NPC's will lock bumble against against a wall and kill him.  
 
-	
 	\subsection{Test 1}
-		Bumble will generally perform well in this world however this should be a given as there are a large amount of resources and a only one hornet to attack him, our performance with the current system is not as optimal as it has previously been where bumble could go infinitely. To resolve the current issue with the system we feel that we need to improve the get closest method as this isn't actually giving and optimal goal. 
+		Bumble will generally perform well in this world however this should be a given as there are a large amount of resources and a only one hornet to attack him, our performance with the current system is not as optimal as it has previously been where bumble could go infinitely. To resolve the current issue with the system we feel that we need to improve the get closest method as this isn't actually giving the optimal goal. 
 		
 	\subsection{Test 2}
-		 In this test the supplied 1.5 version will survive far longer than the current 1.6 version we have been unable to detect the difference between these two version that is causing this issue. It should also be noted that the even earlier versions of the system 1.3 onward will also do very well in this test.
+		 In this test the supplied 1.5 version will survive far longer than the current 1.6 version we have been unable to detect the difference between these two version and what is causing the issue. It should also be noted that the even earlier versions of the system 1.3 onward will also do very well in this test.
 		
 		\subsection{Test 3}
 		Our success on this test is minimal due to high amount of hornets and that they amplify the blocking issue that was previously present. 
 		
 		\subsection{Test 4}
-		Again bumble will die very fast on this test due to the wasp block bug. s
+		Again bumble will die very fast on this test due to the large amount of wasps present and the blocking bug.
 		
 	
 	\subsection{Test 5}
@@ -320,14 +319,13 @@ Although we were fairly pleased with the final outcome of the final game, there 
 	
 \subsection{Search Improvements}
 
-At current the search in the system is simple in nature, it was desired to have implemented A* but this has unfortunately proven to be problematic.
+At current the search in the system is simple in nature, it was desired to have implemented A* but this has unfortunately proven to be problematic.  A* would haven given bumble optimal routs and this would increase his overall success as he would spend less time traveling to his goal node. It would have also been interesting investigate more naturalistic search approaches such as Phi* however we given our previous issues this has remained out of the scope of the current project. 
 		
-The current search could be improved by searching for the same goal once a search is erased.
+The search currently implemented in the system could benefit greatly from the following features, search is not currently started after it has been performed, essentially meaning bumble is missing sitting out a term. The current search could be improved by searching for the same goal once a search is erased as at the moment this could lead to unnatural paths if the bumble has to avoid an enemy and then decides he wants to search for something else. This would also prevent a deadlock like effect from occurring because bumble would no longer be indecisive and once he has decided to do something he will ensure that that is completed. 
 				
 \subsection{Collision avoidance}
-		
-\subsection{Naturalistic search} 
-				
+		The collision avoidance implemented in the current system is simplistic in nature it would be advantageous to extend this through the use of ray casting or more novel approaches such as those used in the open source $C++$ collision avoidance system clearstep. 
+						
 \subsection{Objectives}
 
 We could also add some sort of objectives system to the game to allow Bumble to actually plan his `method of attack'. Creating some basic rules which would specify some appropriate behaviour based on Bumble's current state could accomplish this. For example, say Bumble came across some birdseed in the level, it would be useful for Bumble to then be able to search his map to see if he had seen a bird, and then create a path to it. This behaviour would also be helpful in the case of locked doors; if Bumble finds a key to a door he has already seen, it would be useful to be able to use the search to get back there.
